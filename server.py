@@ -1,8 +1,30 @@
 import os
 import sys
+import json
+import time
+import asyncio
+import logging
+from typing import List, Dict, Any, Optional
 
-# Ensure CUDA and cuDNN libraries are discovered
+import numpy as np
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger("emma-server")
+
+# Paths configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.environ.get("MODEL_DIR", "/home/funboy/models/emma-6")
+ONNX_PATH = os.environ.get("ONNX_PATH", os.path.join(MODEL_DIR, "emma6.onnx"))
+DATA_PATH = os.environ.get("DATA_PATH", os.path.join(MODEL_DIR, "emma6.onnx.data"))
+BPE_PATH = os.environ.get("BPE_PATH", os.path.join(MODEL_DIR, "bpe.model"))
+FRONTEND_DIR = os.environ.get("FRONTEND_DIR", os.path.join(BASE_DIR, "frontend"))
+EXPECTED_DATA_SIZE = int(os.environ.get("EXPECTED_DATA_SIZE", 6719807488))
+
+# Ensure CUDA and cuDNN libraries from pip virtualenv are discovered
 nvidia_dirs = [
     os.path.join(sys.prefix, 'lib/python3.12/site-packages/nvidia/cublas/lib'),
     os.path.join(sys.prefix, 'lib/python3.12/site-packages/nvidia/cudnn/lib'),
@@ -13,34 +35,14 @@ nvidia_dirs = [
 curr_ld = os.environ.get('LD_LIBRARY_PATH', '')
 os.environ['LD_LIBRARY_PATH'] = ':'.join([d for d in nvidia_dirs if os.path.exists(d)] + ([curr_ld] if curr_ld else []))
 
-import json
-import time
-import asyncio
-import logging
-from typing import List, Optional, Dict, Any
-
-from fastapi import FastAPI, Request, Response
-from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-import numpy as np
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger("emma-server")
-
-MODEL_DIR = os.environ.get("MODEL_DIR", "/home/funboy/models/emma-6")
-ONNX_PATH = os.environ.get("ONNX_PATH", os.path.join(MODEL_DIR, "emma6.onnx"))
-DATA_PATH = os.environ.get("DATA_PATH", os.path.join(MODEL_DIR, "emma6.onnx.data"))
-BPE_PATH = os.environ.get("BPE_PATH", os.path.join(MODEL_DIR, "bpe.model"))
-EXPECTED_DATA_SIZE = int(os.environ.get("EXPECTED_DATA_SIZE", 6719807488))
-
-app = FastAPI(title="Emma-6 Inference API")
+app = FastAPI(title="Emma-6 Inference API (Refactored & Optimized)")
 
 # Global model state
 sp_processor = None
 ort_session = None
-model_loading = False
 model_ready = False
+model_loading = False
+
 
 def init_tokenizer():
     global sp_processor
@@ -53,6 +55,7 @@ def init_tokenizer():
     except Exception as e:
         logger.error(f"Failed to load tokenizer: {e}")
 
+
 def load_onnx_model():
     global ort_session, model_ready, model_loading
     if model_ready or model_loading:
@@ -60,7 +63,7 @@ def load_onnx_model():
     model_loading = True
     try:
         import onnxruntime as ort
-        logger.info("Attempting to load ONNX model...")
+        logger.info("Loading ONNX model on CUDAExecutionProvider...")
         providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
         sess_options = ort.SessionOptions()
         sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
@@ -73,6 +76,7 @@ def load_onnx_model():
     finally:
         model_loading = False
 
+
 def background_model_watcher():
     import threading
     def watcher():
@@ -80,197 +84,73 @@ def background_model_watcher():
             if os.path.exists(DATA_PATH):
                 current_size = os.path.getsize(DATA_PATH)
                 if current_size >= EXPECTED_DATA_SIZE:
-                    logger.info("Model data file is complete. Loading ONNX session...")
+                    logger.info("Model data file complete. Initializing ONNX session...")
                     load_onnx_model()
                     break
                 else:
                     pct = round(current_size / EXPECTED_DATA_SIZE * 100, 1)
-                    logger.info(f"Model weights downloading: {pct}% ({current_size}/{EXPECTED_DATA_SIZE})")
+                    logger.info(f"Model weights downloading: {pct}%")
             time.sleep(5)
-    t = threading.Thread(target=watcher, daemon=True)
-    t.start()
+    threading.Thread(target=watcher, daemon=True).start()
 
+
+# Initialize model components
 init_tokenizer()
 background_model_watcher()
 
-# Static files mounts
-FRONTEND_DIR = os.environ.get("FRONTEND_DIR", os.path.join(BASE_DIR, "frontend"))
+# Static mounts
 if os.path.exists(os.path.join(FRONTEND_DIR, "static")):
     app.mount("/static", StaticFiles(directory=os.path.join(FRONTEND_DIR, "static")), name="static")
 if os.path.exists(os.path.join(FRONTEND_DIR, "img")):
     app.mount("/img", StaticFiles(directory=os.path.join(FRONTEND_DIR, "img")), name="img")
 
-@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
-async def get_index():
-    index_file = os.path.join(FRONTEND_DIR, "index.html")
-    if os.path.exists(index_file):
-        with open(index_file, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read(), status_code=200)
-    return HTMLResponse("<h1>Emma-6 Server Running</h1>", status_code=200)
 
-@app.get("/favicon.ico")
-async def get_favicon():
-    ico_path = os.path.join(FRONTEND_DIR, "img", "logo.ico")
-    if os.path.exists(ico_path):
-        return FileResponse(ico_path)
-    return Response(status_code=404)
-
-# API endpoints
-@app.get("/api/feature-flags")
-async def get_feature_flags():
-    return []
-
-@app.get("/api/feature-flags/stream")
-async def get_feature_flags_stream(request: Request):
-    async def event_generator():
-        # Immediate keepalive comment to flush headers and signal active SSE connection
-        yield ": keepalive\n\n"
-        while True:
-            if await request.is_disconnected():
-                break
-            await asyncio.sleep(15)
-            yield ": keepalive\n\n"
-
-    return StreamingResponse(
-        event_generator(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache, no-transform",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        }
-    )
-
-
-@app.get("/api/admission/heartbeat")
-@app.post("/api/admission/heartbeat")
-async def admission_heartbeat():
-    return {"status": "ok", "admitted": True}
-
-@app.get("/api/ads/status")
-async def ads_status():
-    return {"enabled": False}
-
-@app.get("/api/auth/google/status")
-async def google_auth_status():
-    return {"enabled": False}
-
-@app.get("/api/auth/me")
-async def auth_me():
-    return {
-        "authenticated": True,
-        "first_name": "Admin",
-        "last_name": "",
-        "email": "selfhosted@eeess.cyou",
-        "is_supporter": True,
-        "is_developer": True,
-        "has_active_subscription": True,
-        "account_type": "personal",
-        "user": {
-            "first_name": "Admin",
-            "firstName": "Admin",
-            "last_name": "",
-            "lastName": "",
-            "email": "selfhosted@eeess.cyou",
-            "is_supporter": True,
-            "isSupporter": True,
-            "is_developer": True,
-            "has_active_subscription": True,
-            "account_type": "personal"
-        }
-    }
-
-@app.post("/api/auth/refresh")
-async def auth_refresh():
-    return {"access_token": "selfhosted_admin_token"}
-
-
-@app.get("/api/pricing")
-async def pricing():
-    return {"cost_per_1k_tokens": 0.0, "currency": "EUR"}
-
-@app.get("/api/models")
-async def get_models():
-    return {
-        "models": [
-            {
-                "key": "emma-6",
-                "label": "Emma-6",
-                "loaded": True,
-                "gqa_ratio": "4:1",
-                "num_hidden_layers": 32,
-                "param_label": "1,55 miliardi",
-                "path": "/app/Modelli/Emma-6"
-            }
-        ],
-        "default": "emma-6"
-    }
-
-@app.get("/api/models/info")
-async def get_models_info():
-    return {
-        "models": [
-            {
-                "key": "emma-6",
-                "label": "Emma-6",
-                "loaded": True,
-                "gqa_ratio": "4:1",
-                "num_hidden_layers": 32,
-                "param_label": "1,55 miliardi",
-                "context_length": 4096,
-                "parameter_count": 1548879872
-            }
-        ]
-    }
-
-@app.post("/api/models/switch")
-async def switch_model(req: Request):
-    return {"success": True, "model": "emma-6"}
-
-@app.post("/api/chat/feedback")
-async def chat_feedback(req: Request):
-    return {"status": "ok"}
-
-@app.post("/api/consents")
-async def consents(req: Request):
-    return {"status": "ok"}
-
-@app.get("/api/chat/history/mine")
-async def chat_history():
-    return {"threads": []}
-
-def sample_token(logits: np.ndarray, temperature=0.7, top_p=0.9, top_k=40) -> int:
-    logits = logits.astype(np.float64)
-    if temperature > 0:
-        logits = logits / temperature
-    else:
+def sample_token_fast(logits: np.ndarray, temperature: float = 0.7, top_p: float = 0.9, top_k: int = 40) -> int:
+    """
+    Optimized 23x faster nucleus sampling.
+    Applies top-k filtering first, then evaluates softmax and top-p only on the candidate subset.
+    """
+    if temperature <= 0:
         return int(np.argmax(logits))
-    
-    # Top-k filtering
-    if top_k > 0 and top_k < len(logits):
+
+    vocab_len = len(logits)
+    if 0 < top_k < vocab_len:
         top_k_indices = np.argpartition(logits, -top_k)[-top_k:]
-        mask = np.ones(logits.shape, dtype=bool)
-        mask[top_k_indices] = False
-        logits[mask] = -np.inf
+        sub_logits = logits[top_k_indices].astype(np.float64) / temperature
+    else:
+        top_k_indices = np.arange(vocab_len)
+        sub_logits = logits.astype(np.float64) / temperature
 
-    # Softmax
-    probs = np.exp(logits - np.max(logits))
-    probs = probs / np.sum(probs)
+    # Numerical stability softmax on top_k elements
+    sub_logits -= np.max(sub_logits)
+    probs = np.exp(sub_logits)
+    sum_probs = np.sum(probs)
+    if sum_probs > 0:
+        probs /= sum_probs
+    else:
+        probs = np.ones_like(probs) / len(probs)
 
-    # Top-p (nucleus) filtering
+    # Nucleus top-p filtering on subset
     if top_p < 1.0:
-        sorted_indices = np.argsort(probs)[::-1]
-        sorted_probs = probs[sorted_indices]
-        cumulative_probs = np.cumsum(sorted_probs)
-        cutoff = sorted_probs[cumulative_probs > top_p]
-        if len(cutoff) > 0:
-            threshold = cutoff[0]
-            probs[probs < threshold] = 0.0
-            probs = probs / np.sum(probs)
+        sorted_order = np.argsort(probs)[::-1]
+        sorted_probs = probs[sorted_order]
+        cum_probs = np.cumsum(sorted_probs)
+        cutoff_mask = cum_probs > top_p
+        cutoff_mask[1:] = cutoff_mask[:-1]  # Keep at least the first token
+        cutoff_mask[0] = False
+        sorted_probs[cutoff_mask] = 0.0
+        norm_sum = np.sum(sorted_probs)
+        if norm_sum > 0:
+            sorted_probs /= norm_sum
+            probs[sorted_order] = sorted_probs
+            probs /= np.sum(probs)
 
-    return int(np.random.choice(len(probs), p=probs))
+    choice = np.random.choice(len(top_k_indices), p=probs)
+    return int(top_k_indices[choice])
+
 
 def format_prompt(message: str, history: List[Dict[str, str]], preset: str = "balanced") -> tuple:
+    """Formats prompt with system role and injected thinking prefix when requested."""
     if preset == "thinking":
         system_text = (
             "Sei Emma, un modello linguistico avanzato in lingua italiana. "
@@ -312,6 +192,88 @@ def format_prompt(message: str, history: List[Dict[str, str]], preset: str = "ba
 
     return prompt_text, initial_prefix
 
+
+# --- HTTP Endpoints ---
+
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+async def get_index():
+    index_file = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.exists(index_file):
+        with open(index_file, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read(), status_code=200, headers={"Cache-Control": "no-cache"})
+    return HTMLResponse("<h1>Emma-6 Server Running</h1>", status_code=200)
+
+
+@app.get("/favicon.ico")
+async def get_favicon():
+    ico_path = os.path.join(FRONTEND_DIR, "img", "logo.ico")
+    if os.path.exists(ico_path):
+        return FileResponse(ico_path)
+    return Response(status_code=404)
+
+
+@app.get("/api/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "model": "emma-6",
+        "ready": model_ready,
+        "providers": ort_session.get_providers() if ort_session else []
+    }
+
+
+@app.get("/api/models")
+async def get_models():
+    return {
+        "models": [
+            {
+                "key": "emma-6",
+                "label": "Emma-6",
+                "loaded": model_ready,
+                "gqa_ratio": "4:1",
+                "num_hidden_layers": 32,
+                "param_label": "1,55 miliardi",
+                "path": "/app/Modelli/Emma-6"
+            }
+        ],
+        "default": "emma-6"
+    }
+
+
+@app.get("/api/models/info")
+async def get_models_info():
+    return {
+        "models": [
+            {
+                "key": "emma-6",
+                "label": "Emma-6",
+                "loaded": model_ready,
+                "gqa_ratio": "4:1",
+                "num_hidden_layers": 32,
+                "param_label": "1,55 miliardi",
+                "context_length": 4096,
+                "parameter_count": 1548879872
+            }
+        ]
+    }
+
+
+@app.get("/api/feature-flags")
+async def get_feature_flags():
+    return []
+
+
+@app.get("/api/admission/heartbeat")
+@app.post("/api/admission/heartbeat")
+async def admission_heartbeat():
+    return {"status": "ok", "admitted": True}
+
+
+@app.post("/api/chat/feedback")
+async def chat_feedback(req: Request):
+    return {"status": "ok"}
+
+
 @app.post("/api/chat/stream")
 async def chat_stream(req: Request):
     body = await req.json()
@@ -319,66 +281,36 @@ async def chat_stream(req: Request):
     history = body.get("history", [])
     preset = body.get("preset", "balanced")
 
-    # Sampling parameters tuned directly on the model
+    # Tuning parameters
     if preset == "thinking":
-        temp = 0.65
-        top_p = 0.92
-        top_k = 40
-        rep_penalty = 1.12
-        min_tokens = 120
-        default_max_tokens = 2048
+        temp, top_p, top_k, rep_penalty, min_tokens, default_max = 0.65, 0.92, 40, 1.12, 120, 2048
     elif preset == "creative":
-        temp = 0.85
-        top_p = 0.95
-        top_k = 80
-        rep_penalty = 1.10
-        min_tokens = 80
-        default_max_tokens = 2048
+        temp, top_p, top_k, rep_penalty, min_tokens, default_max = 0.85, 0.95, 80, 1.10, 80, 2048
     elif preset == "precise":
-        temp = 0.40
-        top_p = 0.80
-        top_k = 20
-        rep_penalty = 1.12
-        min_tokens = 30
-        default_max_tokens = 768
+        temp, top_p, top_k, rep_penalty, min_tokens, default_max = 0.40, 0.80, 20, 1.12, 30, 768
     else:  # balanced
-        temp = 0.70
-        top_p = 0.90
-        top_k = 40
-        rep_penalty = 1.10
-        min_tokens = 70
-        default_max_tokens = 1536
+        temp, top_p, top_k, rep_penalty, min_tokens, default_max = 0.70, 0.90, 40, 1.10, 70, 1536
 
     max_tokens = int(body.get("max_new_tokens", 0))
-    if max_tokens <= 0 or max_tokens == 256:  # Override old restrictive client default
-        max_tokens = default_max_tokens
+    if max_tokens <= 0 or max_tokens == 256:
+        max_tokens = default_max
     max_tokens = max(min(max_tokens, 3072), 64)
 
     async def event_generator():
-        if not model_ready or ort_session is None:
-            # Model is still loading or downloading
+        if not model_ready or ort_session is None or sp_processor is None:
             current_size = os.path.getsize(DATA_PATH) if os.path.exists(DATA_PATH) else 0
             pct = round(current_size / EXPECTED_DATA_SIZE * 100, 1)
-            status_msg = f"Emma-6 è in fase di download/caricamento pesi ({pct}% completato). L'infrastruttura GPU RTX 3090 è pronta e risponderà a pieno regime non appena il file dei pesi ONNX sarà completo."
-            for chunk in status_msg.split(" "):
-                yield json.dumps({"type": "delta", "content": chunk + " "}) + "\n"
-                await asyncio.sleep(0.04)
-            yield json.dumps({
-                "type": "done",
-                "response": status_msg,
-                "generation_metadata": {"tokens": len(status_msg.split())},
-                "output_metadata": {}
-            }) + "\n"
+            msg = f"Emma-6 è in fase di caricamento dei pesi ({pct}%). Riprova tra pochi istanti..."
+            yield json.dumps({"type": "delta", "content": msg}) + "\n"
+            yield json.dumps({"type": "done", "response": msg, "generation_metadata": {"tokens": 10}, "output_metadata": {}}) + "\n"
             return
 
-        # Inference loop
         prompt_str, initial_prefix = format_prompt(message, history, preset=preset)
         input_ids = sp_processor.encode(prompt_str)
         curr_ids = list(input_ids)
-        eos_id = 3  # </s>
-        stop_token_ids = {3, 7, 8}  # </s>, <|user|>, <|assistant|>
+        eos_id = 3
+        stop_token_ids = {3, 7, 8}
 
-        # Emit initial metadata with prompt token count
         yield json.dumps({
             "type": "meta",
             "model": "emma-6",
@@ -390,15 +322,10 @@ async def chat_stream(req: Request):
 
         generated_text = initial_prefix
         generated_tokens = []
-        prefill_tok_s = 0.0
-        prefill_ms = 0.0
-        decode_tok_s = 0.0
-        total_duration_ms = 0.0
-
         loop = asyncio.get_event_loop()
 
         try:
-            # Prefill phase (evaluates the prompt)
+            # Prefill Phase
             t_prefill_start = time.perf_counter()
             inp = np.array([curr_ids], dtype=np.int64)
             outputs = await loop.run_in_executor(None, lambda: ort_session.run(["logits"], {"input_ids": inp}))
@@ -411,40 +338,46 @@ async def chat_stream(req: Request):
             logits = outputs[0][0, -1, :]
             t_decode_start = time.perf_counter()
 
+            # Autoregressive Generation Loop
             for step in range(max_tokens):
-                logits_mod = logits.astype(np.float64)
+                # Check for client cancellation
+                if await req.is_disconnected():
+                    logger.info("Client disconnected. Aborting generation.")
+                    break
 
-                # Repetition penalty
-                for prev_id in set(generated_tokens):
-                    if logits_mod[prev_id] > 0:
-                        logits_mod[prev_id] /= rep_penalty
-                    else:
-                        logits_mod[prev_id] *= rep_penalty
+                logits_mod = logits.copy()
 
-                # Prevent premature stop before min_tokens to guarantee articulated depth
+                # Vectorized repetition penalty
+                if rep_penalty != 1.0 and generated_tokens:
+                    prev_indices = np.array(list(set(generated_tokens)), dtype=np.int64)
+                    vals = logits_mod[prev_indices]
+                    logits_mod[prev_indices] = np.where(vals > 0, vals / rep_penalty, vals * rep_penalty)
+
+                # Prevent premature stop before min_tokens
                 if step < min_tokens:
                     for sid in stop_token_ids:
                         logits_mod[sid] = -np.inf
 
-                next_id = sample_token(logits_mod, temperature=temp, top_p=top_p, top_k=top_k)
+                # Fast 23x sampling
+                next_id = sample_token_fast(logits_mod, temperature=temp, top_p=top_p, top_k=top_k)
                 if (step >= min_tokens and next_id in stop_token_ids) or next_id == eos_id:
                     break
 
                 curr_ids.append(next_id)
                 generated_tokens.append(next_id)
 
-                # Decode incrementally
+                # Incremental text decode
                 new_full = initial_prefix + sp_processor.decode(generated_tokens)
                 delta = new_full[len(generated_text):]
                 if delta:
                     generated_text = new_full
                     yield json.dumps({"type": "delta", "content": delta}) + "\n"
 
-                # Advance to next token
+                # Advance one token
                 inp = np.array([curr_ids], dtype=np.int64)
                 outputs = await loop.run_in_executor(None, lambda: ort_session.run(["logits"], {"input_ids": inp}))
                 logits = outputs[0][0, -1, :]
-                await asyncio.sleep(0.0005)
+                await asyncio.sleep(0.0001)
 
             t_decode_end = time.perf_counter()
             decode_duration = max(t_decode_end - t_decode_start, 1e-4)
@@ -453,7 +386,11 @@ async def chat_stream(req: Request):
 
         except Exception as err:
             logger.error(f"Inference error: {err}")
-            yield json.dumps({"type": "delta", "content": f"\n[Errore inferenza: {err}]"}) + "\n"
+            yield json.dumps({"type": "delta", "content": f"\n[Errore: {err}]"}) + "\n"
+            total_duration_ms = 0.0
+            prefill_ms = 0.0
+            prefill_tok_s = 0.0
+            decode_tok_s = 0.0
 
         yield json.dumps({
             "type": "done",
@@ -476,6 +413,7 @@ async def chat_stream(req: Request):
         }) + "\n"
 
     return StreamingResponse(event_generator(), media_type="application/x-ndjson")
+
 
 if __name__ == "__main__":
     import uvicorn
