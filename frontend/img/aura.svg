@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
+  <defs>
+    <radialGradient id="cellula-fill" cx="40%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#0B9285"/>
+      <stop offset="60%" stop-color="#08746A"/>
+      <stop offset="100%" stop-color="#055850"/>
+    </radialGradient>
+    <radialGradient id="cellula-core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.65"/>
+    </radialGradient>
+    <style>
+      @keyframes aura-morph {
+        0%, 100% { transform: scale(1)    rotate(0deg);  }
+        33%      { transform: scale(1.04) rotate(2deg);  }
+        66%      { transform: scale(0.98) rotate(-2deg); }
+      }
+      @keyframes aura-pulse {
+        0%, 100% { transform: scale(1);    opacity: 1;    }
+        50%      { transform: scale(1.18); opacity: 0.85; }
+      }
+      .membrane { transform-origin: 48px 48px; transform-box: fill-box; animation: aura-morph 6s ease-in-out infinite; }
+      .nucleus  { transform-origin: 48px 48px; transform-box: fill-box; animation: aura-pulse 2.4s ease-in-out infinite; }
+    </style>
+  </defs>
+  <path class="membrane"
+        d="M 48 8 C 68 8 86 22 86 44 C 86 64 76 84 54 88 C 32 92 14 78 10 58 C 6 38 22 8 48 8 Z"
+        fill="url(#cellula-fill)"/>
+  <ellipse cx="48" cy="48" rx="22" ry="20" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2" fill="none"/>
+  <circle class="nucleus" cx="48" cy="48" r="9" fill="url(#cellula-core)"/>
+</svg>

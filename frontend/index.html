@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>Emma 6 - Low IQ Self-Hosted AI</title>
+    <meta name="description" content="Emma 6 LLM self-hosted con accelerazione GPU NVIDIA GeForce RTX 3090 24GB, 128GB RAM su motore ONNX Runtime CUDA." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://emma.eeess.cyou/" />
+    <link rel="stylesheet" href="/static/css/app.css?v=selfhosted_v10" />
+    <style id="dark-theme-styles">
+    /* Base Variables & Theme */
+    body.dark-theme, [data-theme="dark"] {
+        --bg: #0b1110 !important;
+        --surface: rgba(20, 29, 28, 0.95) !important;
+        --surface-solid: #151e1d !important;
+        --ink: #eaf2f1 !important;
+        --text: #e6f0ee !important;
+        --text-2: #9fb3b1 !important;
+        --text-3: #637775 !important;
+        --line: rgba(255, 255, 255, 0.08) !important;
+        --line-strong: rgba(20, 184, 166, 0.4) !important;
+        --brand: #14b8a6 !important;
+        --brand-dark: #0d9488 !important;
+        --brand-10: rgba(20, 184, 166, 0.15) !important;
+        --brand-20: rgba(20, 184, 166, 0.25) !important;
+        --brand-30: rgba(20, 184, 166, 0.35) !important;
+        --shadow: 0 18px 54px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+        --shadow-soft: 0 10px 34px rgba(0, 0, 0, 0.45) !important;
+        --shadow-strong: 0 26px 72px rgba(0, 0, 0, 0.7) !important;
+        color-scheme: dark;
+    }
+    body.dark-theme {
+        background: #0b1110 !important;
+        color: var(--text) !important;
+    }
+
+    /* Barra superiore (Header) */
+    body.dark-theme .bar {
+        background: rgba(12, 18, 17, 0.94) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(16px) !important;
+    }
+    body.dark-theme .bar__title,
+    body.dark-theme .bar__heading,
+    body.dark-theme .bar__title strong {
+        color: #f1f7f6 !important;
+    }
+    body.dark-theme .bar__subtitle {
+        color: #7d9492 !important;
+    }
+    body.dark-theme .bar__model-pill {
+        background: rgba(20, 184, 166, 0.12) !important;
+        border-color: rgba(20, 184, 166, 0.28) !important;
+        color: #2dd4bf !important;
+    }
+    body.dark-theme .bar__icon-btn {
+        color: var(--text-2) !important;
+    }
+    body.dark-theme .bar__icon-btn:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #fff !important;
+    }
+    body.dark-theme .bar__icon-btn img {
+        filter: brightness(0) invert(0.85);
+    }
+
+    /* Messaggio dell'assistente Emma (DARK CARD ELEGANTE) */
+    body.dark-theme .message--assistant {
+        background: #151e1d !important;
+        color: #e6f0ee !important;
+        border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+    }
+    body.dark-theme .message--assistant .message__role {
+        color: #2dd4bf !important;
+        opacity: 1 !important;
+        font-weight: 700 !important;
+    }
+    body.dark-theme .message--assistant .message__content,
+    body.dark-theme .message--assistant .message__content p,
+    body.dark-theme .message--assistant .message__content span,
+    body.dark-theme .message--assistant .message__content li {
+        color: #e6f0ee !important;
+    }
+    body.dark-theme .message--assistant .message__content h1,
+    body.dark-theme .message--assistant .message__content h2,
+    body.dark-theme .message--assistant .message__content h3,
+    body.dark-theme .message--assistant .message__content h4,
+    body.dark-theme .message--assistant .message__content h5,
+    body.dark-theme .message--assistant .message__content h6,
+    body.dark-theme .message--assistant .md-heading,
+    body.dark-theme .message--assistant .md-heading--1,
+    body.dark-theme .message--assistant .md-heading--2,
+    body.dark-theme .message--assistant .md-heading--3,
+    body.dark-theme .message--assistant .md-heading--4,
+    body.dark-theme .message--assistant .md-heading--5,
+    body.dark-theme .message--assistant .md-heading--6,
+    body.dark-theme .message--assistant div[role="heading"],
+    body.dark-theme .message--assistant [role="heading"],
+    body.dark-theme .md-heading,
+    body.dark-theme .md-heading--1,
+    body.dark-theme .md-heading--2,
+    body.dark-theme .md-heading--3,
+    body.dark-theme .md-heading--4,
+    body.dark-theme .md-heading--5,
+    body.dark-theme .md-heading--6,
+    body.dark-theme div[role="heading"],
+    body.dark-theme [role="heading"] {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+    }
+    body.dark-theme .message--assistant strong,
+    body.dark-theme .message--assistant b {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+    body.dark-theme .message--assistant .message__footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        padding-top: 6px !important;
+    }
+    body.dark-theme .message--assistant .message__disclaimer {
+        color: #5eead4 !important;
+        opacity: 0.8 !important;
+    }
+    body.dark-theme .message--assistant .message__disclaimer img {
+        filter: brightness(0) invert(0.75);
+    }
+    body.dark-theme .message__feedback-btn,
+    body.dark-theme .message__copy {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 8px !important;
+    }
+    body.dark-theme .message__feedback-btn:hover,
+    body.dark-theme .message__copy:hover {
+        background: rgba(255, 255, 255, 0.12) !important;
+    }
+    body.dark-theme .message__feedback-btn img,
+    body.dark-theme .message__copy img {
+        filter: brightness(0) invert(0.85);
+    }
+
+    /* Messaggio utente */
+    body.dark-theme .message--user {
+        background: linear-gradient(135deg, #097268 0%, #065e55 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(20, 184, 166, 0.35) !important;
+        box-shadow: 0 6px 20px rgba(6, 94, 85, 0.35) !important;
+    }
+    body.dark-theme .message--user .message__meta {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    /* Telemetry Bar */
+    body.dark-theme .telemetry {
+        background: rgba(14, 21, 20, 0.95) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #728a88 !important;
+    }
+    body.dark-theme .telemetry strong {
+        color: #2dd4bf !important;
+    }
+
+    /* Composer e Textarea prompt */
+    body.dark-theme .composer {
+        background: rgba(14, 21, 20, 0.95) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(16px) !important;
+    }
+    body.dark-theme .composer textarea,
+    body.dark-theme textarea#messageInput {
+        background: #0f1716 !important;
+        color: #f1f7f6 !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        caret-color: #2dd4bf !important;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35) !important;
+    }
+    body.dark-theme .composer textarea::placeholder,
+    body.dark-theme textarea#messageInput::placeholder {
+        color: #5d7573 !important;
+    }
+    body.dark-theme .composer textarea:focus,
+    body.dark-theme textarea#messageInput:focus {
+        border-color: #2dd4bf !important;
+        box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.35) !important;
+    }
+    body.dark-theme .composer__btn--send {
+        background: #0d9488 !important;
+        color: #fff !important;
+    }
+    body.dark-theme .composer__btn--send:hover {
+        background: #0f766e !important;
+    }
+    body.dark-theme .composer__btn--stop {
+        background: rgba(20, 184, 166, 0.2) !important;
+        color: #2dd4bf !important;
+    }
+
+    /* Prompt Chips */
+    body.dark-theme .prompt-chip,
+    body.dark-theme .prompt-chip--animated {
+        background: rgba(20, 32, 30, 0.88) !important;
+        border: 1px solid rgba(45, 212, 191, 0.25) !important;
+        color: #e6f0ee !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+    }
+    body.dark-theme .prompt-chip:hover,
+    body.dark-theme .prompt-chip--animated:hover {
+        background: rgba(20, 184, 166, 0.25) !important;
+        border-color: #2dd4bf !important;
+        color: #ffffff !important;
+    }
+    body.dark-theme .empty-state p {
+        color: #9fb3b1 !important;
+    }
+
+    /* ── DRAWERS (Preferenze, API, Info) IN DARK THEME ── */
+    body.dark-theme .drawer,
+    body.dark-theme #settingsPanel,
+    body.dark-theme #apiPanel,
+    body.dark-theme #infoPanel {
+        background: #111817 !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: -28px 0 80px rgba(0, 0, 0, 0.75), inset 1px 0 0 rgba(255, 255, 255, 0.04) !important;
+        color: #e6f0ee !important;
+    }
+    body.dark-theme .drawer__head {
+        background: rgba(17, 24, 23, 0.95) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(18px) !important;
+    }
+    body.dark-theme .drawer__title {
+        color: #f1f7f6 !important;
+    }
+    body.dark-theme .drawer__close {
+        color: #8fa5a3 !important;
+    }
+    body.dark-theme .drawer__close:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* Hero inside Settings Drawer */
+    body.dark-theme .settings-hero {
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.16) 0%, #162422 100%) !important;
+        border: 1px solid rgba(20, 184, 166, 0.25) !important;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35) !important;
+    }
+    body.dark-theme .settings-hero::after {
+        border-color: rgba(20, 184, 166, 0.2) !important;
+        box-shadow: inset 0 0 0 18px rgba(20, 184, 166, 0.04) !important;
+    }
+    body.dark-theme .settings-hero__title {
+        color: #f1f7f6 !important;
+    }
+    body.dark-theme .settings-hero__meta {
+        color: #9cb1af !important;
+    }
+
+    /* Cards inside Settings Drawer (Opzioni) */
+    body.dark-theme .settings-card {
+        background: #162221 !important;
+        border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3) !important;
+        color: #e6f0ee !important;
+    }
+    body.dark-theme .settings-card .drawer__label,
+    body.dark-theme .drawer__label {
+        color: #2dd4bf !important;
+    }
+    body.dark-theme .settings-card__description {
+        color: #9cb1af !important;
+    }
+    body.dark-theme .settings-card__description strong {
+        color: #2dd4bf !important;
+    }
+    body.dark-theme .settings-card__hint {
+        color: #7d9492 !important;
+    }
+    body.dark-theme .settings-card__notice {
+        background: rgba(245, 158, 11, 0.12) !important;
+        border: 1px solid rgba(245, 158, 11, 0.25) !important;
+        color: #fbbf24 !important;
+    }
+    body.dark-theme .settings-card__notice--info {
+        background: rgba(20, 184, 166, 0.12) !important;
+        border: 1px solid rgba(20, 184, 166, 0.25) !important;
+        color: #2dd4bf !important;
+    }
+
+    /* Sliders & Controls in Dark Theme */
+    body.dark-theme .drawer__advanced {
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    body.dark-theme .seg button {
+        background: #101918 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #9fb3b1 !important;
+    }
+    body.dark-theme .seg button:hover {
+        background: rgba(20, 184, 166, 0.15) !important;
+        color: #ffffff !important;
+    }
+    body.dark-theme .seg button.is-active {
+        background: #0d9488 !important;
+        border-color: #14b8a6 !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4) !important;
+    }
+    body.dark-theme .slider label {
+        color: #9fb3b1 !important;
+    }
+    body.dark-theme .slider label span {
+        color: #2dd4bf !important;
+        font-weight: 700 !important;
+    }
+    body.dark-theme .slider input[type="range"] {
+        accent-color: #14b8a6 !important;
+    }
+    body.dark-theme .toggle-switch__track {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+    body.dark-theme .toggle-switch input:checked + .toggle-switch__track {
+        background: #0d9488 !important;
+    }
+    body.dark-theme .toggle-switch__state {
+        color: #2dd4bf !important;
+    }
+    body.dark-theme .drawer-backdrop,
+    body.dark-theme .modal-backdrop {
+        background: rgba(0, 0, 0, 0.65) !important;
+        backdrop-filter: blur(6px) !important;
+    }
+
+    /* API Panel in Dark Theme */
+    body.dark-theme .api-hero {
+        background: linear-gradient(135deg, #097268 0%, #065e55 100%) !important;
+    }
+    body.dark-theme .api-benefit {
+        background: #162221 !important;
+        border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+        color: #e6f0ee !important;
+    }
+    body.dark-theme .api-benefit__title {
+        color: #f1f7f6 !important;
+    }
+    body.dark-theme .api-benefit__meta {
+        color: #9fb3b1 !important;
+    }
+    body.dark-theme .api-pricing__label {
+        color: #f1f7f6 !important;
+    }
+
+    /* Info Panel in Dark Theme */
+    body.dark-theme .info-grid {
+        background: #162221 !important;
+        border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        border-radius: 18px !important;
+        padding: 12px 16px !important;
+    }
+    body.dark-theme .info-grid__item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+    body.dark-theme .info-grid__label { color: #7d9492 !important; }
+    body.dark-theme .info-grid__value { color: #2dd4bf !important; }
+
+    /* Footer Hardware Spec Bar (Default / Light Mode) */
+    .footer {
+        padding: 10px 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.95);
+        border-top: 1px solid rgba(11, 146, 133, 0.12);
+        backdrop-filter: blur(12px);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .footer__hw-specs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 12.5px;
+        color: #475569;
+        line-height: 1.4;
+    }
+    .footer__hw-specs .hw-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(13, 148, 136, 0.1);
+        border: 1px solid rgba(13, 148, 136, 0.25);
+        color: #0f766e;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        letter-spacing: 0.02em;
+    }
+    .footer__hw-specs .hw-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+        animation: hw-pulse 2s infinite ease-in-out;
+    }
+    @keyframes hw-pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    .footer__hw-specs .hw-item {
+        color: #475569;
+        font-weight: 500;
+    }
+    .footer__hw-specs .hw-item strong {
+        color: #0f172a;
+        font-weight: 700;
+    }
+    .footer__hw-specs .hw-sep {
+        color: #94a3b8;
+        font-weight: 400;
+        user-select: none;
+    }
+
+    /* Thinking Toggle Button in Footer */
+    .thinking-hw-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(100, 116, 139, 0.08);
+        border: 1px solid rgba(100, 116, 139, 0.25);
+        color: #475569;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        user-select: none;
+    }
+    .thinking-hw-toggle:hover {
+        background: rgba(100, 116, 139, 0.16);
+        border-color: rgba(100, 116, 139, 0.38);
+        color: #1e293b;
+    }
+    .thinking-hw-toggle .thinking-led {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #94a3b8;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
+        transition: all 0.25s ease;
+    }
+    .thinking-hw-toggle.is-active {
+        background: rgba(16, 185, 129, 0.12);
+        border-color: rgba(16, 185, 129, 0.5);
+        color: #0f766e;
+    }
+    .thinking-hw-toggle.is-active .thinking-led {
+        background: #10b981;
+        box-shadow: 0 0 6px rgba(16, 185, 129, 0.7), 0 0 12px rgba(16, 185, 129, 0.4);
+        animation: hw-pulse 1.8s infinite ease-in-out;
+    }
+    .thinking-hw-toggle.is-active strong {
+        color: #0f766e;
+    }
+
+    /* Message Copy Button Vector SVG Styling */
+    .message__copy {
+        color: #64748b;
+    }
+    .message__copy:hover {
+        color: #0f766e;
+    }
+    body.dark-theme .message__copy {
+        color: #94a3b8 !important;
+    }
+    body.dark-theme .message__copy:hover {
+        color: #2dd4bf !important;
+    }
+
+    /* Footer Hardware Spec Bar in Dark Theme */
+    body.dark-theme .footer {
+        background: rgba(10, 16, 15, 0.98) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    body.dark-theme .footer__hw-specs {
+        color: #94a3b8 !important;
+    }
+    body.dark-theme .footer__hw-specs .hw-badge {
+        background: rgba(45, 212, 191, 0.12) !important;
+        border: 1px solid rgba(45, 212, 191, 0.3) !important;
+        color: #2dd4bf !important;
+    }
+    body.dark-theme .footer__hw-specs .hw-item {
+        color: #94a3b8 !important;
+    }
+    body.dark-theme .footer__hw-specs .hw-item strong {
+        color: #e2e8f0 !important;
+    }
+    body.dark-theme .footer__hw-specs .hw-sep {
+        color: #475569 !important;
+    }
+    body.dark-theme .thinking-hw-toggle {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border-color: rgba(255, 255, 255, 0.16) !important;
+        color: #94a3b8 !important;
+    }
+    body.dark-theme .thinking-hw-toggle:hover {
+        background: rgba(255, 255, 255, 0.12) !important;
+        border-color: rgba(255, 255, 255, 0.28) !important;
+        color: #e2e8f0 !important;
+    }
+    body.dark-theme .thinking-hw-toggle.is-active {
+        background: rgba(45, 212, 191, 0.14) !important;
+        border-color: rgba(45, 212, 191, 0.45) !important;
+        color: #2dd4bf !important;
+    }
+    body.dark-theme .thinking-hw-toggle.is-active .thinking-led {
+        background: #2dd4bf !important;
+        box-shadow: 0 0 8px #2dd4bf, 0 0 14px rgba(45, 212, 191, 0.8) !important;
+    }
+    body.dark-theme .thinking-hw-toggle.is-active strong {
+        color: #2dd4bf !important;
+    }
+
+    /* Day / Night Toggle Button */
+    #themeToggleBtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        color: var(--text-2);
+    }
+    #themeToggleBtn:hover {
+        background: rgba(11, 146, 133, 0.1);
+        color: var(--brand);
+    }
+    body.dark-theme #themeToggleBtn {
+        color: #fbbf24;
+    }
+    body.dark-theme #themeToggleBtn:hover {
+        background: rgba(251, 191, 36, 0.15);
+    }
+
+    /* Social Link X (@funB0Tnft) */
+    #xSocialBtn {
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        color: var(--text-2);
+    }
+    #xSocialBtn:hover {
+        background: rgba(11, 146, 133, 0.1);
+        color: var(--brand);
+        transform: translateY(-1px);
+    }
+    body.dark-theme #xSocialBtn {
+        color: #e6f0ee !important;
+    }
+    body.dark-theme #xSocialBtn:hover {
+        background: rgba(255, 255, 255, 0.12) !important;
+        color: #ffffff !important;
+    }
+
+    /* Thinking Toggle Brain Emote */
+    .thinking-hw-toggle .thinking-brain {
+        font-size: 13px;
+        line-height: 1;
+        display: inline-block;
+        transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .thinking-hw-toggle:hover .thinking-brain {
+        transform: scale(1.2);
+    }
+    .thinking-hw-toggle.is-active .thinking-brain {
+        filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.8));
+    }
+    body.dark-theme .thinking-hw-toggle.is-active .thinking-brain {
+        filter: drop-shadow(0 0 6px rgba(45, 212, 191, 0.95));
+    }
+    
+    /* FORCE HIDE ALL REMOVED/UNUSED MODALS AND BACKDROPS */
+    .modal--limit, #limitModal, #limitBackdrop,
+    .modal--login, #loginUserModal, #loginUserBackdrop,
+    .modal--register, #registerModal, #registerBackdrop,
+    .modal--user-register, #userRegisterModal, #userRegisterBackdrop,
+    .modal--company-login, #companyLoginModal, #companyLoginBackdrop,
+    .modal--premium-preferences, #premiumPreferencesModal, #premiumPreferencesBackdrop,
+    .modal--confirm, #deleteAccountModal, #deleteAccountBackdrop,
+    .modal--profile-edit, #profileEditModal, #profileEditBackdrop,
+    .modal--contribution,
+    #pretrainingContributionModal, #pretrainingContributionBackdrop,
+    #questionContributionModal, #questionContributionBackdrop,
+    #answerContributionModal, #answerContributionBackdrop,
+    #evaluationContributionModal, #evaluationContributionBackdrop {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+    }
+
+    </style>
+    <link rel="icon" href="/img/logo.ico" type="image/x-icon" />
+    <meta name="ai-content-language" content="it-IT" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Emma 6 Self-Hosted" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:title" content="Emma 6 — LLM Italiano Self-Hosted" />
+    <meta property="og:description" content="Chatta con Emma 6, Large Language Model italiano in esecuzione locale su architettura bare-metal con GPU NVIDIA RTX 3090 ed engine ONNX Runtime CUDA." />
+    <meta property="og:url" content="https://emma.eeess.cyou/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Emma 6 — LLM Italiano Self-Hosted" />
+    <meta name="twitter:description" content="Chatta con Emma 6, Large Language Model italiano in esecuzione locale su architettura bare-metal con GPU NVIDIA RTX 3090 ed engine ONNX Runtime CUDA." />
+    <script>
+    (function() {
+        try {
+            var t = localStorage.getItem('emma_theme_v4');
+            if (t === 'dark') {
+                document.documentElement.classList.add('dark-theme');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark-theme');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        } catch (e) {}
+    })();
+    </script>
+</head>
+<body>
+
+    <!-- rete neurale animata sullo sfondo -->
+    <canvas id="neuralCanvas" aria-hidden="true"></canvas>
+
+    <!-- cookie banner rimosso / disattivato -->
+    <aside id="consentBanner" class="consent-banner" hidden style="display:none !important;" aria-hidden="true">
+        <button id="consentAcceptBtn" type="button" hidden></button>
+    </aside>
+
+    <div class="chat-app chat-app--conversation">
+
+        <!-- top bar compatta -->
+        <header class="bar">
+            <div class="bar__left">
+                <div class="bar__title">
+                    <h1 class="bar__heading">Emma 6 - Low IQ Self-Hosted AI</h1>
+                    <span class="bar__badge" id="barBadge">
+                        <span class="bar__badge-prefix">Modello</span>
+                        <span class="bar__model-pill" id="modelPill" tabindex="0" role="button" aria-haspopup="listbox" aria-label="Modello attuale: emma-6 LLM">
+                            <span class="bar__model-pill-label" id="modelPillLabel">emma-6 LLM</span>
+                            <span class="bar__model-pill-chevron" aria-hidden="true">
+                                <svg width="10" height="6" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6z" fill="currentColor"/></svg>
+                            </span>
+                        </span>
+                        <ul class="bar__model-dropdown" id="modelDropdown" role="listbox" aria-label="Seleziona il modello Emma" hidden></ul>
+                    </span>
+                </div>
+            </div>
+            <nav class="bar__right" aria-label="Navigazione strumenti Emma">
+                <div class="bar__menu-wrap">
+                    <button id="themeToggleBtn" class="bar__icon-btn" type="button" aria-label="Tema Scuro / Chiaro" title="Passa da modalità Giorno a Notte">
+                        <svg id="themeIconSun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        <svg id="themeIconMoon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </button>
+                </div>
+                <div class="bar__menu-wrap">
+                    <a id="xSocialBtn" href="https://x.com/funB0Tnft" target="_blank" rel="noopener noreferrer" class="bar__icon-btn" aria-label="Profilo X (@funB0Tnft)" title="Segui su X (@funB0Tnft)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="bar__menu-wrap">
+                    <button id="apiBtn" class="bar__icon-btn" type="button" aria-label="API" title="API Locale Self-Hosted" aria-expanded="false" aria-controls="apiPanel">
+                        <img src="/img/api.png" alt="Icona API" />
+                    </button>
+                </div>
+                <button id="settingsToggleBtn" class="bar__icon-btn" type="button" aria-label="Preferenze" title="Modifica preferenze">
+                    <img src="/img/settings_icon.png" alt="Icona impostazioni" />
+                </button>
+                <button id="clearConversationBtn" class="bar__icon-btn" type="button" aria-label="Nuova sessione" title="Avvia nuova chat">
+                    <img src="/img/new_chat_icon.png" alt="Icona nuova sessione chat" />
+                </button>
+            </nav>
+        </header>
+
+        <!-- area messaggi: il focus dell'intera pagina -->
+        <main class="messages" id="messagesPanel" aria-live="polite">
+            <section class="empty-state" id="emptyState" aria-label="Stato iniziale della chat Emma">
+                <img src="/img/mascotte.png" alt="Logo Emma LLM italiano" class="empty-state__logo" />
+                <p>Chiedimi qualcosa, vedo di aiutarti.</p>
+                <div class="prompt-chips" id="suggestedPrompts"></div>
+            </section>
+        </main>
+
+        <!-- telemetria inline, appare solo dopo il primo messaggio -->
+        <aside class="telemetry" id="telemetryBar" aria-label="Metriche della risposta Emma" hidden>
+            <span>Prompt: <strong id="metricPromptTokens">—</strong> token</span>
+            <span> | </span>
+            <span>Output: <strong id="metricOutputTokens">—</strong> token</span>
+            <span> | </span>
+            <span>Prefill: <strong id="metricPrefillSpeed">—</strong> tok/s</span>
+            <span> | </span>
+            <span>Decode: <strong id="metricDecodeSpeed">—</strong> tok/s</span>
+            <span> | </span>
+            <span><strong id="metricLatency">—</strong><span id="metricLatencyUnit"></span></span>
+            <span> | </span>
+            <span>Temp: <strong id="metricTemp">0.70</strong></span>
+            <span> | </span>
+            <span>Top-P: <strong id="metricTopP">0.90</strong></span>
+            <span> | </span>
+            <span>Rep-P: <strong id="metricRepP">1.10</strong></span>
+            <span id="ragDebugMetrics" class="telemetry__rag" hidden> | RAG: <strong id="metricRagState">—</strong>
+                <span id="metricRagDetail"></span></span>
+        </aside>
+
+        <!-- esito pre-check chat: componente distinto dalle bubble del modello -->
+        <aside
+            id="chatGuardrailNotice"
+            class="chat-guardrail"
+            data-state="blocked"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-labelledby="chatGuardrailTitle"
+            hidden
+        >
+            <span class="chat-guardrail__icon" aria-hidden="true">
+                <img class="chat-guardrail__blocked-logo" src="/img/emma_guardrails_rosso.png" alt="" />
+                <svg width="22" height="24" viewBox="0 0 22 24" fill="none">
+                    <path d="M11 1.75 19 5v5.85c0 5.02-3.2 9.55-8 11.4-4.8-1.85-8-6.38-8-11.4V5l8-3.25Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                    <path d="M11 7v5.25" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <circle cx="11" cy="16" r="1" fill="currentColor"/>
+                </svg>
+            </span>
+            <div class="chat-guardrail__body">
+                <h2 id="chatGuardrailTitle" class="chat-guardrail__eyebrow">Emma Guardrails ha bloccato il tuo prompt</h2>
+                <p id="chatGuardrailMessage" class="chat-guardrail__message" hidden></p>
+                <div class="chat-guardrail__actions">
+                    <p id="chatGuardrailCategory" class="chat-guardrail__category" hidden></p>
+                    <div id="chatGuardrailFeedback" class="chat-guardrail__feedback" hidden>
+                        <button id="chatGuardrailFeedbackUp" class="message__feedback-btn" type="button" aria-label="Feedback positivo" aria-pressed="false" title="Blocco corretto">
+                            <img src="/img/pollice_su.png" alt="Pollice su" />
+                        </button>
+                        <button id="chatGuardrailFeedbackDown" class="message__feedback-btn" type="button" aria-label="Feedback negativo" aria-pressed="false" title="Blocco non corretto">
+                            <img src="/img/pollice_giu.png" alt="Pollice giù" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- composer fisso in basso -->
+        <form id="composerForm" class="composer">
+            <textarea
+                id="messageInput"
+                name="message"
+                rows="1"
+                placeholder="Fammi una domanda..."
+            ></textarea>
+            <p id="composerFeedback" class="composer__feedback" role="alert" hidden></p>
+            <div class="composer__actions">
+                <button id="stopBtn" class="composer__btn composer__btn--stop" type="button" disabled>
+                    <svg width="18" height="18" viewBox="0 0 18 18"><rect x="3" y="3" width="12" height="12" rx="2" fill="currentColor"/></svg>
+                </button>
+                <button id="sendBtn" class="composer__btn composer__btn--send" type="submit">
+                    <span class="composer__btn-icon composer__btn-icon--send" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 18 18"><path d="M3 15l12-6L3 3v4.5L11.25 9 3 10.5z" fill="currentColor"/></svg>
+                    </span>
+                    <img
+                        src="/img/emma_loading.gif"
+                        alt="Animazione di caricamento risposta Emma"
+                        class="composer__btn-loader"
+                        aria-hidden="true"
+                    />
+                </button>
+            </div>
+        </form>
+        <footer class="footer">
+            <div class="footer__hw-specs">
+                <span class="hw-badge"><span class="hw-dot"></span>Emma 6 Self Hosted</span>
+                <span class="hw-sep">—</span>
+                <span class="hw-item"><strong>HW:</strong> RTX 3090 24GB</span>
+                <span class="hw-sep">·</span>
+                <span class="hw-item">128GB RAM</span>
+                <span class="hw-sep">·</span>
+                <span class="hw-item">i5-13500</span>
+                <span class="hw-sep">·</span>
+                <span class="hw-item">ONNX CUDA</span>
+                <span class="hw-sep">—</span>
+                <button type="button" id="thinkingFooterToggle" class="thinking-hw-toggle" aria-pressed="false" onclick="window.toggleThinkingMode && window.toggleThinkingMode(event)" title="Attiva / Disattiva modalità Thinking (ragionamento profondo)">
+                    <span class="thinking-brain" aria-hidden="true">🧠</span>
+                    <span class="thinking-led" id="thinkingHwLed"></span>
+                    <span class="thinking-hw-title">Thinking <strong id="thinkingHwState">OFF</strong></span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <div id="termsBackdrop" class="modal-backdrop" hidden></div>
+    <section id="termsModal" class="modal" aria-hidden="true" hidden>
+        <header class="modal__head">
+            <h2 class="modal__title">Info</h2>
+            <button id="termsCloseBtn" class="drawer__close" type="button" aria-label="Chiudi termini">×</button>
+        </header>
+        <section class="modal__body terms-copy">
+            <p>Emma 6 Self-Hosted in esecuzione locale su infrastruttura privata bare-metal con GPU NVIDIA RTX 3090.</p>
+        </section>
+    </section>
+
+    <div id="privacyBackdrop" class="modal-backdrop" hidden></div>
+    <section id="privacyModal" class="modal modal--privacy" role="dialog" aria-modal="true" aria-labelledby="privacyTitle" aria-hidden="true" hidden>
+        <header class="modal__head"><span id="privacyTitle" class="modal__title">Privacy</span><button id="privacyCloseBtn" class="drawer__close" type="button" aria-label="Chiudi">×</button></header>
+        <section class="modal__body privacy-copy"><p>Installazione self-hosted locale su server bare-metal con GPU RTX 3090. Nessun dato viene inviato a terzi.</p></section>
+    </section>
+
+    <div id="manifestoBackdrop" class="modal-backdrop" hidden></div>
+    <section id="manifestoModal" class="modal" aria-hidden="true" hidden>
+        <header class="modal__head"><h2 class="modal__title">Manifesto</h2><button id="manifestoCloseBtn" class="drawer__close" type="button" aria-label="Chiudi">×</button></header>
+        <section class="modal__body manifesto-copy"><p>Emma 6 Self-Hosted: inferenza locale su GPU dedicata NVIDIA RTX 3090 24GB e 128GB RAM.</p></section>
+    </section>
+
+    <div id="guardrailsBackdrop" class="modal-backdrop" hidden></div>
+    <section id="guardrailsModal" class="modal modal--guardrails" aria-hidden="true" hidden>
+        <header class="modal__head"><h2 class="modal__title">Guardrails</h2><button id="guardrailsCloseBtn" class="drawer__close" type="button" aria-label="Chiudi">×</button></header>
+        <section class="modal__body guardrails-copy"><p>Sistema di moderazione attivo in locale.</p></section>
+    </section>
+
+    <!-- info drawer -->
+    <div id="infoBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="infoPanel" class="drawer drawer--info" aria-hidden="true" hidden>
+        <header class="drawer__head">
+            <h2 class="drawer__title">Scheda modello</h2>
+            <button id="infoCloseBtn" class="drawer__close" type="button">×</button>
+        </header>
+
+        <dl class="info-grid" id="infoGrid">
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Nome</dt>
+                <dd class="info-grid__value" id="infoModelName">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Architettura</dt>
+                <dd class="info-grid__value" id="infoArchitecture">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Parametri</dt>
+                <dd class="info-grid__value" id="infoParams">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Embedding dim</dt>
+                <dd class="info-grid__value" id="infoHiddenSize">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Attention heads</dt>
+                <dd class="info-grid__value" id="infoAttnHeads">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Transformer blocks</dt>
+                <dd class="info-grid__value" id="infoLayers">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Context length</dt>
+                <dd class="info-grid__value" id="infoContext">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Vocabolario</dt>
+                <dd class="info-grid__value" id="infoVocab">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Feed-forward dim</dt>
+                <dd class="info-grid__value" id="infoFFDim">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">RoPE theta</dt>
+                <dd class="info-grid__value" id="infoRoPE">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Normalizzazione</dt>
+                <dd class="info-grid__value" id="infoNorm">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Attivazione MLP</dt>
+                <dd class="info-grid__value" id="infoActivation">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Allineamento</dt>
+                <dd class="info-grid__value" id="infoAlignment">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Tokenizer</dt>
+                <dd class="info-grid__value" id="infoTokenizer">—</dd>
+            </div>
+            <div class="info-grid__item">
+                <dt class="info-grid__label">Formato esportazione</dt>
+                <dd class="info-grid__value" id="infoONNX">—</dd>
+            </div>
+        </dl>
+    </aside>
+
+    <div id="apiBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="apiPanel" class="drawer drawer--info" aria-hidden="true" hidden>
+        <header class="drawer__head">
+            <h2 class="drawer__title">API Locale Self-Hosted</h2>
+            <button id="apiCloseBtn" class="drawer__close" type="button">×</button>
+        </header>
+
+        <!-- hero -->
+        <section class="api-hero" style="background: linear-gradient(135deg, #097268 0%, #065e55 100%);">
+            <h3 class="api-hero__title" style="color: #fff;">Emma-6 API Locale</h3>
+            <p class="api-hero__sub" style="color: rgba(255,255,255,0.85);">Esegui inferenze in tempo reale sul server bare-metal con accelerazione GPU NVIDIA RTX 3090.</p>
+        </section>
+
+        <!-- benefit cards -->
+        <section class="api-benefits" aria-label="Specifiche API">
+            <article class="api-benefit">
+                <div class="api-benefit__copy" style="width: 100%;">
+                    <h4 class="api-benefit__title">⚡ Endpoint Streaming</h4>
+                    <span class="api-benefit__meta" style="font-family: monospace; font-size: 12px; word-break: break-all; display: block; margin-top: 4px; padding: 6px; background: rgba(0,0,0,0.06); border-radius: 6px;">POST /api/chat/stream</span>
+                </div>
+            </article>
+
+            <article class="api-benefit">
+                <div class="api-benefit__copy" style="width: 100%;">
+                    <h4 class="api-benefit__title">🚀 Motore di Esecuzione</h4>
+                    <span class="api-benefit__meta">ONNX Runtime CUDA · Modello Emma-6 (1,55B parametri) · FP32</span>
+                </div>
+            </article>
+
+            <article class="api-benefit">
+                <div class="api-benefit__copy" style="width: 100%;">
+                    <h4 class="api-benefit__title">💻 Hardware Dedicato</h4>
+                    <span class="api-benefit__meta">NVIDIA GeForce RTX 3090 (24GB VRAM) · 128GB RAM · Intel i5-13500</span>
+                </div>
+            </article>
+        </section>
+
+        <!-- cURL example -->
+        <section class="api-pricing">
+            <h3 class="api-pricing__label" style="padding-top: 10px; padding-bottom: 5px; font-weight: 700;">Esempio chiamata cURL:</h3>
+            <div style="background: #0d1413; color: #2dd4bf; padding: 12px; border-radius: 12px; font-family: monospace; font-size: 11px; overflow-x: auto; line-height: 1.5; border: 1px solid rgba(255,255,255,0.1);">
+curl -X POST https://emma.eeess.cyou/api/chat/stream \<br>
+&nbsp;&nbsp;-H "Content-Type: application/json" \<br>
+&nbsp;&nbsp;-d '{"message": "Ciao Emma!", "preset": "balanced"}'
+            </div>
+        </section>
+
+        <footer class="api-cta-wrap" style="margin-top: 16px;">
+            <div style="text-align: center; font-size: 12px; color: var(--text-2); padding: 8px;">
+                Accesso diretto senza autenticazione o limiti di token.
+            </div>
+        </footer>
+    </aside>
+
+        <!-- profile drawer (utente loggato) -->
+    <div id="profileBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="profilePanel" class="drawer drawer--profile" aria-hidden="true" hidden>
+        <header class="drawer__head">
+            <h2 class="drawer__title">Profilo Locale</h2>
+            <button id="profileCloseBtn" class="drawer__close" type="button">&times;</button>
+        </header>
+        <section class="drawer__section">
+            <p style="padding: 12px; color: var(--text-2);">Account locale self-hosted attivo.</p>
+        </section>
+    </aside>
+
+    <div id="profileEditBackdrop" class="modal-backdrop" hidden></div>
+    <section id="profileEditModal" class="modal modal--profile-edit" aria-hidden="true" hidden><button id="profileEditCloseBtn" class="drawer__close" type="button">&times;</button></section>
+    <div id="deleteAccountBackdrop" class="modal-backdrop" hidden></div>
+    <section id="deleteAccountModal" class="modal modal--confirm" aria-hidden="true" hidden><button id="deleteAccountCloseBtn" class="drawer__close" type="button">&times;</button></section>
+    <div id="loginUserBackdrop" class="modal-backdrop" hidden></div>
+    <section id="loginUserModal" class="modal modal--login" aria-hidden="true" hidden><button id="loginUserCloseBtn" class="drawer__close" type="button">&times;</button></section>
+    <div id="registerBackdrop" class="modal-backdrop" hidden></div>
+    <section id="registerModal" class="modal modal--register" aria-hidden="true" hidden><button id="registerCloseBtn" class="drawer__close" type="button">&times;</button></section>
+    <div id="companyLoginBackdrop" class="modal-backdrop" hidden></div>
+    <section id="companyLoginModal" class="modal modal--login modal--company-login" aria-hidden="true" hidden><button id="companyLoginCloseBtn" class="drawer__close" type="button">&times;</button></section>
+    <div id="userRegisterBackdrop" class="modal-backdrop" hidden></div>
+    <section id="userRegisterModal" class="modal modal--user-register" aria-hidden="true" hidden><button id="userRegisterCloseBtn" class="drawer__close" type="button">&times;</button></section>
+    <div id="pretrainingContributionBackdrop" class="modal-backdrop" hidden></div>
+    <section id="pretrainingContributionModal" class="modal modal--contribution" aria-hidden="true" hidden><button id="pretrainingContributionClose" class="drawer__close" type="button">&times;</button></section>
+    <div id="questionContributionBackdrop" class="modal-backdrop" hidden></div>
+    <section id="questionContributionModal" class="modal modal--contribution" aria-hidden="true" hidden><button id="questionContributionClose" class="drawer__close" type="button">&times;</button></section>
+    <div id="answerContributionBackdrop" class="modal-backdrop" hidden></div>
+    <section id="answerContributionModal" class="modal modal--contribution" aria-hidden="true" hidden><button id="answerContributionClose" class="drawer__close" type="button">&times;</button></section>
+    <div id="evaluationContributionBackdrop" class="modal-backdrop" hidden></div>
+    <section id="evaluationContributionModal" class="modal modal--contribution" aria-hidden="true" hidden><button id="evaluationContributionClose" class="drawer__close" type="button">&times;</button></section>
+    <div id="limitBackdrop" class="modal-backdrop" hidden></div>
+    <section id="limitModal" class="modal modal--limit" aria-hidden="true" hidden><button id="limitClose" class="drawer__close" type="button">&times;</button></section>
+    <div id="downloadBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="downloadPanel" class="drawer drawer--download" aria-hidden="true" hidden><button id="downloadCloseBtn" class="drawer__close" type="button">&times;</button></aside>
+    <div id="productsBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="productsPanel" class="drawer drawer--products" aria-hidden="true" hidden><button id="productsCloseBtn" class="drawer__close" type="button">&times;</button></aside>
+    <div id="fineTuningBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="fineTuningPanel" class="drawer drawer--fine-tuning" aria-hidden="true" hidden><button id="fineTuningCloseBtn" class="drawer__close" type="button">&times;</button></aside>
+
+    <!-- settings drawer -->
+    <div id="settingsBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="settingsPanel" class="drawer drawer--settings" aria-hidden="true" hidden>
+        <header class="drawer__head">
+            <h2 class="drawer__title">Preferenze</h2>
+            <button id="settingsCloseBtn" class="drawer__close" type="button">×</button>
+        </header>
+
+        <section class="drawer__section">
+            <header class="settings-hero">
+                <h3 class="settings-hero__title">Configura Emma come vuoi</h3>
+                <p class="settings-hero__meta">Scegli come il modello ragiona, recupera contesto e mantiene continuità durante la conversazione.</p>
+            </header>
+        </section>
+
+        <section class="settings-stack" aria-label="Controlli preferenze Emma">
+            <section class="settings-card" id="ragSettingsCard">
+                <div class="drawer__inline-head">
+                    <label class="drawer__label drawer__label--inline" for="ragToggle">RAG</label>
+                    <label class="toggle-switch" for="ragToggle" aria-label="Attiva o disattiva il RAG">
+                        <input id="ragToggle" type="checkbox" />
+                        <span class="toggle-switch__track" aria-hidden="true"></span>
+                        <span class="toggle-switch__state" id="ragToggleState">ON</span>
+                    </label>
+                </div>
+                <p class="settings-card__description" id="ragDescription">Il sistema potrebbe consultare, prima di generare la risposta, documenti o informazioni rilevanti dal web o da un archivio di informazioni presenti nel nostro database (ad oggi <strong id="knowledgeDocumentCount">—</strong> documenti). Il modello usa poi questi dati come contesto per generare risposte più accurate e aggiornate.</p>
+                <p class="settings-card__notice settings-card__notice--info" id="ragNotice">Il RAG si attiva solo su domande coperte dalla nostra knowledge base: AI, software, business, finanza, cucina, geografia, storia, legale.</p>
+            </section>
+
+            <div id="premiumPreferences" class="settings-premium-group">
+
+            <section class="settings-card">
+                <div class="drawer__inline-head">
+                    <label class="drawer__label drawer__label--inline" for="historyToggle">Memoria conversazionale</label>
+                    <label class="toggle-switch" for="historyToggle" aria-label="Memoria conversazionale sempre attiva">
+                        <input id="historyToggle" type="checkbox" checked disabled />
+                        <span class="toggle-switch__track" aria-hidden="true"></span>
+                        <span class="toggle-switch__state" id="historyToggleState">ON</span>
+                    </label>
+                </div>
+                <p class="settings-card__description">È la capacità del modello di ricordare informazioni scambiate durante la chat per mantenere continuità nel dialogo.</p>
+                <p class="settings-card__notice" id="historyModelHint" hidden></p>
+            </section>
+
+            <section class="settings-card" id="promptModeSettingsCard" hidden>
+                <label class="drawer__label">Gestione dei prompt</label>
+                <div class="seg" id="modeControl"></div>
+                <p class="settings-card__hint" id="modeDescription"></p>
+            </section>
+
+            <section class="settings-card" id="responseSettingsCard">
+                <label class="drawer__label">Stile delle risposte</label>
+                <div class="seg" id="presetControl"></div>
+                <p class="settings-card__hint" id="presetDescription"></p>
+
+                <div class="drawer__advanced" id="advancedPanel">
+                    <div class="slider">
+                        <label>Temperature <span id="temperatureValue">0.80</span></label>
+                        <input id="temperatureRange" type="range" min="0.10" max="1.50" step="0.01" disabled />
+                    </div>
+                    <div class="slider">
+                        <label>Top-p <span id="topPValue">0.92</span></label>
+                        <input id="topPRange" type="range" min="0.10" max="1.00" step="0.01" disabled />
+                    </div>
+                    <div class="slider">
+                        <label>Rep. penalty <span id="repetitionPenaltyValue">1.15</span></label>
+                        <input id="repetitionPenaltyRange" type="range" min="1.00" max="1.50" step="0.01" disabled />
+                    </div>
+                    <div class="slider" id="responseLengthSettings" hidden>
+                        <label for="responseLengthMode">Lunghezza della risposta</label>
+                        <select id="responseLengthMode" class="response-length-mode" aria-describedby="responseLengthHelp">
+                            <option value="auto">Automatica</option>
+                            <option value="manual">Limite manuale</option>
+                        </select>
+                        <label for="maxTokensRange">Max tokens <span id="maxTokensValue">automatico</span></label>
+                        <input id="maxTokensRange" type="range" min="16" max="4096" step="1" disabled />
+                        <p id="responseLengthHelp" class="response-length-help">Automatica usa lo spazio disponibile. Il limite manuale può interrompere la risposta; in Adattiva il profilo può usare meno token.</p>
+                    </div>
+                    <div class="slider">
+                        <label>Top-k <span id="topKValue">50</span></label>
+                        <input id="topKRange" type="range" min="1" max="256" step="1" disabled />
+                    </div>
+                </div>
+            </section>
+            </div>
+        </section>
+    </aside>
+
+    <div id="premiumPreferencesBackdrop" class="modal-backdrop" hidden></div>
+    <section id="premiumPreferencesModal" class="modal modal--premium-preferences" aria-hidden="true" hidden>
+        <button id="premiumPreferencesCloseBtn" class="drawer__close" type="button" aria-label="Chiudi">×</button>
+        <button id="premiumPreferencesDismissBtn" class="drawer__close" type="button" aria-label="Annulla">×</button>
+        <a id="premiumPreferencesCta" href="#" style="display:none;" aria-hidden="true"></a>
+    </section>
+
+
+    
+    <!-- Emma-6 characteristics modal -->
+    <div id="emma6FeaturesBackdrop" class="modal-backdrop" hidden></div>
+    <section id="emma6FeaturesModal" class="modal modal--features" aria-hidden="true" hidden>
+        <header class="modal__head modal__head--features">
+            <h2 class="modal__title modal__title--features">Emma-6 — LLM Emma</h2>
+            <button id="emma6FeaturesCloseBtn" class="drawer__close" type="button" aria-label="Chiudi caratteristiche">×</button>
+        </header>
+        <section class="modal__body features-body">
+            <section class="features-section">
+                <h3 class="features-section__title">Scheda Modello</h3>
+                <div class="features-kv">
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Architettura</span><span class="features-kv__val">GPT decoder-only · RoPE · RMSNorm · SwiGLU · GQA (4:1)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Parametri</span><span class="features-kv__val">1,55 miliardi</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Transformer block</span><span class="features-kv__val">32</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Hidden size</span><span class="features-kv__val">2.048</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attention heads</span><span class="features-kv__val">32 query + 8 KV (GQA 4:1, head_dim 64)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Feed-forward dim</span><span class="features-kv__val">5.504 (SwiGLU)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Context length</span><span class="features-kv__val">4.096 token</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Vocabolario</span><span class="features-kv__val">64.000 token (SentencePiece BPE, byte fallback)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Normalizzazione</span><span class="features-kv__val">RMSNorm</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attivazione MLP</span><span class="features-kv__val">SwiGLU</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">RoPE theta</span><span class="features-kv__val">500.000</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Dropout</span><span class="features-kv__val">0.0 (nessun dropout)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Tied embeddings</span><span class="features-kv__val">Sì (token_emb = lm_head)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Allineamento</span><span class="features-kv__val">SFT (DPO disabilitato)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Pipeline training</span><span class="features-kv__val">Pretrain 90.000 step → SFT 3 epoche</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Corpus pretraining</span><span class="features-kv__val">100 GB raw → ~25 miliardi di token</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Export</span><span class="features-kv__val">PyTorch + ONNX (opset 20)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Peso file ONNX</span><span class="features-kv__val">6,26 GB (FP32, grafo + external data)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Licenza</span><span class="features-kv__val">Licenza non indicata nei file del delivery Emma-6</span></div>
+                    
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Dataset</h3>
+                <div class="features-table-wrap">
+                    <table class="features-table">
+                        <thead><tr><th>Tipologia</th><th>Percentuale</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Generalista</td><td>54,74%</td></tr>
+                            
+                            <tr><td>Codice</td><td>30,25%</td></tr>
+                            
+                            <tr><td>Enciclopedico</td><td>12,84%</td></tr>
+                            
+                            <tr><td>Libri</td><td>2,54%</td></tr>
+                            
+                            <tr><td>Colloquiale</td><td>0,37%</td></tr>
+                            
+                            <tr><td>Politico</td><td>0,28%</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Fonti del Dataset</h3>
+                <p class="features-section__subtitle" style="font-style: normal;">Ringraziamo tutti i progetti open source e le istituzioni che hanno messo a disposizione i loro dataset per finalità di ricerca e addestramento. Questi dati sono stati utilizzati in combinazione con i nostri dataset proprietari, arricchendo significativamente il processo di training.</p>
+                
+                
+                <h4 class="features-subheading">Pretraining</h4>
+                <div class="features-table-wrap">
+                    <table class="features-table features-table--sources">
+                        <thead><tr><th>Dataset</th><th>Link</th><th>Licenza</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Dataset Proprietario</td><td><a href="#" target="_blank" rel="noopener" class="features-link">Emma AI Store</a></td><td>Riservato</td></tr>
+                            
+                            <tr><td>Letteratura Italiana</td><td><a href="https://huggingface.co/datasets/alberto98fx/Letteratura-Italiana/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0, Project Gutenberg</td></tr>
+                            
+                            <tr><td>Libri in italiano</td><td><a href="https://huggingface.co/datasets/IsmaelMousa/libri-in-italiano/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>Europarl</td><td><a href="https://www.statmt.org/europarl/" target="_blank" rel="noopener" class="features-link">statmt.org</a></td><td>MT, NLP research</td></tr>
+                            
+                            <tr><td>clean_mc4_it</td><td><a href="https://huggingface.co/datasets/gsarti/clean_mc4_it" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>ODC-BY</td></tr>
+                            
+                            <tr><td>Wikipedia (dump IT)</td><td><a href="https://dumps.wikimedia.org/" target="_blank" rel="noopener" class="features-link">wikimedia.org</a></td><td>CC BY-SA 4.0, GFDL</td></tr>
+                            
+                            <tr><td>Liber Liber</td><td><a href="https://liberliber.it/" target="_blank" rel="noopener" class="features-link">LiberLiber.it</a></td><td>Pubblico Dominio</td></tr>
+                            
+                            <tr><td>The Stack v2</td><td><a href="https://huggingface.co/datasets/bigcode/the-stack-v2/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>BigCode OpenRAIL-M</td></tr>
+                            
+                            <tr><td>Ebook Foundation</td><td><a href="https://github.com/EbookFoundation/free-programming-books/" target="_blank" rel="noopener" class="features-link">GitHub</a></td><td>CC BY 4.0</td></tr>
+                            
+                            <tr><td>Risorse Matematica</td><td><a href="https://github.com/mcicolella/risorse-matematica/tree/master" target="_blank" rel="noopener" class="features-link">GitHub</a></td><td>Pubblico Dominio</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <h4 class="features-subheading">Fine-Tuning</h4>
+                <div class="features-table-wrap">
+                    <table class="features-table features-table--sources">
+                        <thead><tr><th>Dataset</th><th>Link</th><th>Licenza</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Dataset Proprietario</td><td><a href="#" target="_blank" rel="noopener" class="features-link">Emma AI Store</a></td><td>Riservato</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                
+            </section>
+            
+        </section>
+    </section>
+    
+    <!-- Emma Business characteristics modal -->
+    <div id="emmabusinessFeaturesBackdrop" class="modal-backdrop" hidden></div>
+    <section id="emmabusinessFeaturesModal" class="modal modal--features" aria-hidden="true" hidden>
+        <header class="modal__head modal__head--features">
+            <h2 class="modal__title modal__title--features">Emma Business</h2>
+            <button id="emmabusinessFeaturesCloseBtn" class="drawer__close" type="button" aria-label="Chiudi caratteristiche">×</button>
+        </header>
+        <section class="modal__body features-body">
+            <section class="features-section">
+                <h3 class="features-section__title">Scheda Modello</h3>
+                <div class="features-kv">
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Architettura</span><span class="features-kv__val">Emma Business decoder-only · RoPE · RMSNorm · SwiGLU · GQA (4:1)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Parametri</span><span class="features-kv__val">4,02 miliardi</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Transformer block</span><span class="features-kv__val">36</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Hidden size</span><span class="features-kv__val">2.560</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attention heads</span><span class="features-kv__val">32 query + 8 KV (GQA 4:1, head_dim 128)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Feed-forward dim</span><span class="features-kv__val">9.728 (SwiGLU)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Context length</span><span class="features-kv__val">40.960 token</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Vocabolario</span><span class="features-kv__val">151.936 logits, 151.669 token (BPE, Hugging Face tokenizers)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Normalizzazione</span><span class="features-kv__val">RMSNorm</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attivazione MLP</span><span class="features-kv__val">SwiGLU</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">RoPE theta</span><span class="features-kv__val">1.000.000</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Dropout</span><span class="features-kv__val">0.0 (nessun dropout)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Tied embeddings</span><span class="features-kv__val">Sì (token_emb = lm_head)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Allineamento</span><span class="features-kv__val">Delivery Emma Business; fine-tuning non documentato</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Chat template</span><span class="features-kv__val">ChatML dal delivery</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Stato operativo</span><span class="features-kv__val">Integrato; abilitazione subordinata al benchmark</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Export</span><span class="features-kv__val">PyTorch + ONNX (opset 19)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Peso file ONNX</span><span class="features-kv__val">7,51 GB (FP16, grafo + external data)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Licenza</span><span class="features-kv__val">La licenza di distribuzione non è presente nel delivery Emma Business e deve essere confermata prima della pubblicazione.</span></div>
+                    
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Dataset</h3>
+                <div class="features-table-wrap">
+                    <table class="features-table">
+                        <thead><tr><th>Tipologia</th><th>Percentuale</th></tr></thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Fonti del Dataset</h3>
+                <p class="features-section__subtitle" style="font-style: normal;">Il delivery ricevuto non include il dettaglio dei dataset o del fine-tuning Emma Business.</p>
+                
+                
+                
+                
+                
+                
+                
+            </section>
+            
+        </section>
+    </section>
+    
+    <!-- Emma-5 characteristics modal -->
+    <div id="emma5FeaturesBackdrop" class="modal-backdrop" hidden></div>
+    <section id="emma5FeaturesModal" class="modal modal--features" aria-hidden="true" hidden>
+        <header class="modal__head modal__head--features">
+            <h2 class="modal__title modal__title--features">Emma-5 — LLM Open-source</h2>
+            <button id="emma5FeaturesCloseBtn" class="drawer__close" type="button" aria-label="Chiudi caratteristiche">×</button>
+        </header>
+        <section class="modal__body features-body">
+            <section class="features-section">
+                <h3 class="features-section__title">Scheda Modello</h3>
+                <div class="features-kv">
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Architettura</span><span class="features-kv__val">GPT decoder-only · RoPE · RMSNorm · SwiGLU · GQA (4:1)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Parametri</span><span class="features-kv__val">0,55 miliardi</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Transformer block</span><span class="features-kv__val">28</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Hidden size</span><span class="features-kv__val">1.280</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attention heads</span><span class="features-kv__val">16 query + 4 KV (GQA 4:1, head_dim 80)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Feed-forward dim</span><span class="features-kv__val">3.456 (SwiGLU)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Context length</span><span class="features-kv__val">2.048 token</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Vocabolario</span><span class="features-kv__val">50.000 token (SentencePiece BPE, byte fallback)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Normalizzazione</span><span class="features-kv__val">RMSNorm</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attivazione MLP</span><span class="features-kv__val">SwiGLU</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">RoPE theta</span><span class="features-kv__val">10.000</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Dropout</span><span class="features-kv__val">0.0 (nessun dropout)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Tied embeddings</span><span class="features-kv__val">Sì (token_emb = lm_head)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Allineamento</span><span class="features-kv__val">SFT (DPO disabilitato)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Pipeline training</span><span class="features-kv__val">Pretrain 200.000 step → SFT 3 epoche</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Corpus pretraining</span><span class="features-kv__val">54,36 GB raw · ~10,8 miliardi token</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Export</span><span class="features-kv__val">PyTorch + ONNX (opset 18) + INT8 quantizzato</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Peso file ONNX</span><span class="features-kv__val">2,46 GB (FP32)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Peso file INT8</span><span class="features-kv__val">~560 MB (quantizzato)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Licenza</span><span class="features-kv__val">OpenRAIL-M (con vincoli derivati dalle licenze dei dataset utilizzati)</span></div>
+                    
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Dataset</h3>
+                <div class="features-table-wrap">
+                    <table class="features-table">
+                        <thead><tr><th>Tipologia</th><th>Percentuale</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Codice</td><td>40,48%</td></tr>
+                            
+                            <tr><td>Generalista</td><td>39,46%</td></tr>
+                            
+                            <tr><td>Enciclopedico</td><td>15,68%</td></tr>
+                            
+                            <tr><td>Libri</td><td>3,07%</td></tr>
+                            
+                            <tr><td>Colloquiale</td><td>0,73%</td></tr>
+                            
+                            <tr><td>Politico</td><td>0,55%</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Fonti del Dataset</h3>
+                <p class="features-section__subtitle" style="font-style: normal;">Ringraziamo tutti i progetti open source e le istituzioni che hanno messo a disposizione i loro dataset per finalità di ricerca e addestramento. Questi dati sono stati utilizzati in combinazione con i nostri dataset proprietari, arricchendo significativamente il processo di training.</p>
+                
+                
+                <h4 class="features-subheading">Pretraining</h4>
+                <div class="features-table-wrap">
+                    <table class="features-table features-table--sources">
+                        <thead><tr><th>Dataset</th><th>Link</th><th>Licenza</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Dataset Proprietario</td><td><a href="#" target="_blank" rel="noopener" class="features-link">Emma AI Store</a></td><td>Riservato</td></tr>
+                            
+                            <tr><td>Letteratura Italiana</td><td><a href="https://huggingface.co/datasets/alberto98fx/Letteratura-Italiana/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0, Project Gutenberg</td></tr>
+                            
+                            <tr><td>Libri in italiano</td><td><a href="https://huggingface.co/datasets/IsmaelMousa/libri-in-italiano/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>Europarl</td><td><a href="https://www.statmt.org/europarl/" target="_blank" rel="noopener" class="features-link">statmt.org</a></td><td>MT, NLP research</td></tr>
+                            
+                            <tr><td>clean_mc4_it</td><td><a href="https://huggingface.co/datasets/gsarti/clean_mc4_it" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>ODC-BY</td></tr>
+                            
+                            <tr><td>Wikipedia (dump IT)</td><td><a href="https://dumps.wikimedia.org/" target="_blank" rel="noopener" class="features-link">wikimedia.org</a></td><td>CC BY-SA 4.0, GFDL</td></tr>
+                            
+                            <tr><td>Liber Liber</td><td><a href="https://liberliber.it/" target="_blank" rel="noopener" class="features-link">LiberLiber.it</a></td><td>Pubblico Dominio</td></tr>
+                            
+                            <tr><td>The Stack v2</td><td><a href="https://huggingface.co/datasets/bigcode/the-stack-v2/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>BigCode OpenRAIL-M</td></tr>
+                            
+                            <tr><td>Ebook Foundation</td><td><a href="https://github.com/EbookFoundation/free-programming-books/" target="_blank" rel="noopener" class="features-link">GitHub</a></td><td>CC BY 4.0</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <h4 class="features-subheading">Fine-Tuning</h4>
+                <div class="features-table-wrap">
+                    <table class="features-table features-table--sources">
+                        <thead><tr><th>Dataset</th><th>Link</th><th>Licenza</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Dataset Proprietario</td><td><a href="#" target="_blank" rel="noopener" class="features-link">Emma AI Store</a></td><td>Riservato</td></tr>
+                            
+                            <tr><td>Sapienza NLP</td><td><a href="https://huggingface.co/datasets/sapienzanlp/it-everyday-conversations-llama3.1-2k-TowerInstruct-Mistral-7B-v0.2" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>Oasst1</td><td><a href="https://huggingface.co/datasets/OpenAssistant/oasst1" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>Villanova</td><td><a href="https://huggingface.co/datasets/VillanovaAI/villanova-sft-2603" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>due-chiacchiere</td><td><a href="https://huggingface.co/datasets/DeepMount00/due-chiacchiere/tree/main" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>CC BY 4.0</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                
+            </section>
+            
+        </section>
+    </section>
+    
+    <!-- Emma-4 characteristics modal -->
+    <div id="emma4FeaturesBackdrop" class="modal-backdrop" hidden></div>
+    <section id="emma4FeaturesModal" class="modal modal--features" aria-hidden="true" hidden>
+        <header class="modal__head modal__head--features">
+            <h2 class="modal__title modal__title--features">Emma-4 — LLM Open-source</h2>
+            <button id="emma4FeaturesCloseBtn" class="drawer__close" type="button" aria-label="Chiudi caratteristiche">×</button>
+        </header>
+        <section class="modal__body features-body">
+            <section class="features-section">
+                <h3 class="features-section__title">Scheda Modello</h3>
+                <div class="features-kv">
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Architettura</span><span class="features-kv__val">GPT decoder-only · RoPE · RMSNorm · SwiGLU · GQA (4:1)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Parametri</span><span class="features-kv__val">0,32 miliardi</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Transformer block</span><span class="features-kv__val">24</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Hidden size</span><span class="features-kv__val">1.024</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attention heads</span><span class="features-kv__val">16 query + 4 KV (GQA 4:1, head_dim 64)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Feed-forward dim</span><span class="features-kv__val">2.752 (SwiGLU)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Context length</span><span class="features-kv__val">2.048 token</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Vocabolario</span><span class="features-kv__val">50.000 token (SentencePiece BPE, byte fallback)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Normalizzazione</span><span class="features-kv__val">RMSNorm</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attivazione MLP</span><span class="features-kv__val">SwiGLU</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">RoPE theta</span><span class="features-kv__val">10.000</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Dropout</span><span class="features-kv__val">0.0 (nessun dropout)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Tied embeddings</span><span class="features-kv__val">Sì (token_emb = lm_head)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Allineamento</span><span class="features-kv__val">SFT (DPO disabilitato)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Export</span><span class="features-kv__val">PyTorch + ONNX (opset 18) + INT8 quantizzato</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Peso file ONNX</span><span class="features-kv__val">1,48 GB</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Peso file INT8</span><span class="features-kv__val">~55 MB (quantizzato)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Licenza</span><span class="features-kv__val">OpenRAIL-M (con vincoli derivati dalle licenze dei dataset utilizzati)</span></div>
+                    
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Dataset</h3>
+                <div class="features-table-wrap">
+                    <table class="features-table">
+                        <thead><tr><th>Tipologia</th><th>Percentuale</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Enciclopedico</td><td>43,55%</td></tr>
+                            
+                            <tr><td>Codice</td><td>23,65%</td></tr>
+                            
+                            <tr><td>Generalista</td><td>20,71%</td></tr>
+                            
+                            <tr><td>Libri</td><td>8,53%</td></tr>
+                            
+                            <tr><td>Colloquiale</td><td>2,03%</td></tr>
+                            
+                            <tr><td>Politico</td><td>1,54%</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Fonti del Dataset</h3>
+                <p class="features-section__subtitle" style="font-style: normal;">Ringraziamo tutti i progetti open source e le istituzioni che hanno messo a disposizione i loro dataset per finalità di ricerca e addestramento. Questi dati sono stati utilizzati in combinazione con i nostri dataset proprietari, arricchendo significativamente il processo di training.</p>
+                
+                
+                <h4 class="features-subheading">Pretraining</h4>
+                <div class="features-table-wrap">
+                    <table class="features-table features-table--sources">
+                        <thead><tr><th>Dataset</th><th>Link</th><th>Licenza</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Dataset Proprietario</td><td>—</td><td>Riservato</td></tr>
+                            
+                            <tr><td>Letteratura Italiana</td><td><a href="https://huggingface.co/datasets/alberto98fx/Letteratura-Italiana/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0, Project Gutenberg</td></tr>
+                            
+                            <tr><td>Libri in italiano</td><td><a href="https://huggingface.co/datasets/IsmaelMousa/libri-in-italiano/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>Europarl</td><td><a href="https://www.statmt.org/europarl/" target="_blank" rel="noopener" class="features-link">statmt.org</a></td><td>MT, NLP research</td></tr>
+                            
+                            <tr><td>clean_mc4_it</td><td><a href="https://huggingface.co/datasets/gsarti/clean_mc4_it" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>ODC-BY</td></tr>
+                            
+                            <tr><td>Wikipedia (dump IT)</td><td><a href="https://dumps.wikimedia.org/" target="_blank" rel="noopener" class="features-link">wikimedia.org</a></td><td>CC BY-SA 4.0, GFDL</td></tr>
+                            
+                            <tr><td>Liber Liber</td><td><a href="https://liberliber.it/" target="_blank" rel="noopener" class="features-link">LiberLiber.it</a></td><td>Pubblico Dominio</td></tr>
+                            
+                            <tr><td>The Stack v2</td><td><a href="https://huggingface.co/datasets/bigcode/the-stack-v2/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>BigCode OpenRAIL-M</td></tr>
+                            
+                            <tr><td>Ebook Foundation</td><td><a href="https://github.com/EbookFoundation/free-programming-books/" target="_blank" rel="noopener" class="features-link">GitHub</a></td><td>CC BY 4.0</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <h4 class="features-subheading">Fine-Tuning</h4>
+                <div class="features-table-wrap">
+                    <table class="features-table features-table--sources">
+                        <thead><tr><th>Dataset</th><th>Link</th><th>Licenza</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Dataset Proprietario</td><td>—</td><td>Riservato</td></tr>
+                            
+                            <tr><td>Sapienza NLP</td><td><a href="https://huggingface.co/datasets/sapienzanlp/it-everyday-conversations-llama3.1-2k-TowerInstruct-Mistral-7B-v0.2" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>Oasst1</td><td><a href="https://huggingface.co/datasets/OpenAssistant/oasst1" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>Villanova</td><td><a href="https://huggingface.co/datasets/VillanovaAI/villanova-sft-2603" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>due-chiacchiere</td><td><a href="https://huggingface.co/datasets/DeepMount00/due-chiacchiere/tree/main" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>CC BY 4.0</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                
+            </section>
+            
+        </section>
+    </section>
+    
+    <!-- Emma-3 characteristics modal -->
+    <div id="emma3FeaturesBackdrop" class="modal-backdrop" hidden></div>
+    <section id="emma3FeaturesModal" class="modal modal--features" aria-hidden="true" hidden>
+        <header class="modal__head modal__head--features">
+            <h2 class="modal__title modal__title--features">Emma-3 — LLM Open-source</h2>
+            <button id="emma3FeaturesCloseBtn" class="drawer__close" type="button" aria-label="Chiudi caratteristiche">×</button>
+        </header>
+        <section class="modal__body features-body">
+            <section class="features-section">
+                <h3 class="features-section__title">Scheda Modello</h3>
+                <div class="features-kv">
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Architettura</span><span class="features-kv__val">GPT decoder-only · RoPE · RMSNorm · SwiGLU · GQA (3:1)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Parametri</span><span class="features-kv__val">0,13 miliardi</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Transformer block</span><span class="features-kv__val">16</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Hidden size</span><span class="features-kv__val">768</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attention heads</span><span class="features-kv__val">12 query + 4 KV (GQA 3:1, head_dim 64)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Feed-forward dim</span><span class="features-kv__val">2.048 (SwiGLU)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Context length</span><span class="features-kv__val">2.048 token</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Vocabolario</span><span class="features-kv__val">32.000 token (SentencePiece BPE, byte fallback)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Normalizzazione</span><span class="features-kv__val">RMSNorm</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Attivazione MLP</span><span class="features-kv__val">SwiGLU</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">RoPE theta</span><span class="features-kv__val">10.000</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Dropout</span><span class="features-kv__val">0.0 (nessun dropout)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Tied embeddings</span><span class="features-kv__val">Sì (token_emb = lm_head)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Allineamento</span><span class="features-kv__val">SFT (DPO disabilitato)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Export</span><span class="features-kv__val">PyTorch + ONNX (opset 18)</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Peso file ONNX</span><span class="features-kv__val">601,6 MB</span></div>
+                    
+                    <div class="features-kv__row"><span class="features-kv__key">Licenza</span><span class="features-kv__val">OpenRAIL-M (con vincoli derivati dalle licenze dei dataset utilizzati)</span></div>
+                    
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Dataset</h3>
+                <div class="features-table-wrap">
+                    <table class="features-table">
+                        <thead><tr><th>Tipologia</th><th>Percentuale</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Generalista</td><td>39,97%</td></tr>
+                            
+                            <tr><td>Enciclopedico</td><td>35,22%</td></tr>
+                            
+                            <tr><td>Codice</td><td>17,15%</td></tr>
+                            
+                            <tr><td>Colloquiale</td><td>3,91%</td></tr>
+                            
+                            <tr><td>Politico</td><td>2,96%</td></tr>
+                            
+                            <tr><td>Libri</td><td>0,79%</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="features-section">
+                <h3 class="features-section__title">Fonti del Dataset</h3>
+                <p class="features-section__subtitle" style="font-style: normal;">Ringraziamo tutti i progetti open source e le istituzioni che hanno messo a disposizione i loro dataset per finalità di ricerca e addestramento.</p>
+                
+                
+                <h4 class="features-subheading">Pretraining</h4>
+                <div class="features-table-wrap">
+                    <table class="features-table features-table--sources">
+                        <thead><tr><th>Dataset</th><th>Link</th><th>Licenza</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Dataset Proprietario</td><td>—</td><td>Riservato</td></tr>
+                            
+                            <tr><td>Letteratura Italiana</td><td><a href="https://huggingface.co/datasets/alberto98fx/Letteratura-Italiana/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0, Project Gutenberg</td></tr>
+                            
+                            <tr><td>Libri in italiano</td><td><a href="https://huggingface.co/datasets/IsmaelMousa/libri-in-italiano/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>Apache 2.0</td></tr>
+                            
+                            <tr><td>Europarl</td><td><a href="https://www.statmt.org/europarl/" target="_blank" rel="noopener" class="features-link">statmt.org</a></td><td>MT, NLP research</td></tr>
+                            
+                            <tr><td>clean_mc4_it</td><td><a href="https://huggingface.co/datasets/gsarti/clean_mc4_it" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>ODC-BY</td></tr>
+                            
+                            <tr><td>Wikipedia (dump IT)</td><td><a href="https://dumps.wikimedia.org/" target="_blank" rel="noopener" class="features-link">wikimedia.org</a></td><td>CC BY-SA 4.0, GFDL</td></tr>
+                            
+                            <tr><td>The Stack v2</td><td><a href="https://huggingface.co/datasets/bigcode/the-stack-v2/" target="_blank" rel="noopener" class="features-link">Hugging Face</a></td><td>BigCode OpenRAIL-M</td></tr>
+                            
+                            <tr><td>Ebook Foundation</td><td><a href="https://github.com/EbookFoundation/free-programming-books/" target="_blank" rel="noopener" class="features-link">GitHub</a></td><td>CC BY 4.0</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                <h4 class="features-subheading">Fine-Tuning</h4>
+                <div class="features-table-wrap">
+                    <table class="features-table features-table--sources">
+                        <thead><tr><th>Dataset</th><th>Link</th><th>Licenza</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Dataset Proprietario</td><td>—</td><td>Riservato</td></tr>
+                            
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                
+            </section>
+            
+            <section class="features-section">
+                <h3 class="features-section__title">Benchmark</h3>
+                <p class="features-section__subtitle" style="font-style: normal; margin-bottom: 12px;">Il benchmark utilizzato è il <a class="product-card__inline-link" href="https://github.com/Emma-S-p-A" target="_blank" rel="noopener">Vespucci</a>, sviluppato internamente da Emma 6 Project per valutare i propri modelli di dimensioni contenute su competenze linguistiche, logiche e culturali specifiche della lingua italiana. I benchmark internazionali (SQuAD, MMLU, ARC, ecc...) sono progettati prevalentemente in inglese e su contesti anglosassoni. Questo rischia di penalizzare o non rappresentare correttamente modelli addestrati interamente in italiano. Il Vespucci Benchmark copre 875 domande suddivise in 7 categorie, bilanciando comprensione del testo, ragionamento logico-matematico, grammatica, cultura italiana e resistenza alle allucinazioni.</p>
+                <div class="features-table-wrap">
+                    <table class="features-table">
+                        <thead><tr><th>Categoria</th><th>Corrette</th><th>Totale</th><th>%</th></tr></thead>
+                        <tbody>
+                            
+                            <tr><td>Matematica e ragionamento</td><td>136</td><td>175</td><td>77,7%</td></tr>
+                            
+                            <tr><td>Conoscenza contesto italiano</td><td>58</td><td>93</td><td>62,4%</td></tr>
+                            
+                            <tr><td>Codice e logica strutturata</td><td>57</td><td>100</td><td>57,0%</td></tr>
+                            
+                            <tr><td>Comprensione del testo</td><td>83</td><td>147</td><td>56,5%</td></tr>
+                            
+                            <tr><td>Capacità seguire istruzioni</td><td>65</td><td>125</td><td>52,0%</td></tr>
+                            
+                            <tr><td>Grammatica italiana</td><td>53</td><td>110</td><td>48,2%</td></tr>
+                            
+                            <tr><td>Ragionamento logico</td><td>54</td><td>125</td><td>43,2%</td></tr>
+                            
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td><strong>TOTALE</strong></td>
+                                <td><strong>506</strong></td>
+                                <td><strong>875</strong></td>
+                                <td><strong>57,8%</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+            
+        </section>
+    </section>
+    
+    <script>
+    window.APP_CONFIG = {"availableModels": [{"gqa_ratio": "4:1", "key": "emma-6", "label": "Emma-6", "loaded": true, "num_hidden_layers": 32, "param_label": "1,55 miliardi", "path": "/app/Modelli/Emma-6"}, {"gqa_ratio": "4:1", "key": "emma-business", "label": "Emma Business", "loaded": false, "num_hidden_layers": 36, "param_label": "4,02 miliardi", "path": "/app/Modelli/Emma-Business"}, {"gqa_ratio": "4:1", "key": "emma-5", "label": "Emma-5", "loaded": false, "num_hidden_layers": 28, "param_label": "0,55 miliardi", "path": "/app/Modelli/Emma-5"}, {"gqa_ratio": "4:1", "key": "emma-4", "label": "Emma-4", "loaded": false, "num_hidden_layers": 24, "param_label": "0,32 miliardi", "path": "/app/Modelli/Emma-4"}, {"gqa_ratio": "3:1", "key": "emma-3", "label": "Emma-3", "loaded": false, "num_hidden_layers": 16, "param_label": "0,13 miliardi", "path": "/app/Modelli/Emma-3"}], "debug": {"rag": false}, "defaultModel": "emma-6", "defaults": {"mode": "raw", "port": 8004, "preset": "balanced", "useHistory": true, "useRag": true}, "knowledge": {"documentCount": 224}, "limits": {"anonMessages": 999999, "freeMessages": 999999}, "model": {"activation": "swiglu", "alignment": "SFT", "architecture_label": "GPT decoder-only \u00b7 RoPE \u00b7 RMSNorm \u00b7 SwiGLU", "context_length": 4096, "display_name": "emma-6 LLM", "hidden_size": 2048, "intermediate_size": 5504, "model_key": "emma-6", "model_type": "gpt", "norm_type": "rmsnorm", "num_attention_heads": 32, "num_hidden_layers": 32, "onnx_opset": 20, "parameter_count": 1548879872, "parameter_label": "1,55 miliardi", "presets": [{"description": "Risposte brevi e dirette, ideali per domande semplici o fatti puntuali.", "key": "precise", "label": "Focus", "max_new_tokens": 768, "repetition_penalty": 1.12, "temperature": 0.4, "top_k": 20, "top_p": 0.8}, {"description": "Equilibrio tra sintesi e approfondimento, per risposte articolate ed esaustive. Default consigliato.", "key": "balanced", "label": "Articolata", "max_new_tokens": 1536, "repetition_penalty": 1.1, "temperature": 0.7, "top_k": 40, "top_p": 0.9}, {"description": "Risposte lunghe ed elaborate, per spiegazioni narrative e scrittura creativa.", "key": "creative", "label": "Creativa", "max_new_tokens": 2048, "repetition_penalty": 1.1, "temperature": 0.85, "top_k": 80, "top_p": 0.95}], "provider": "CUDAExecutionProvider", "rope_theta": 500000.0, "tied_embeddings": true, "tokenizer": "sentencepiece", "tuning": {"adaptive_profile_overrides": {}, "history_default_on": true, "history_ui_hint": "Emma-6 usa una finestra di contesto da 4096 token: conserva i turni pi\u00f9 recenti che vi rientrano, fino a 32.", "identity_overrides": {}, "max_history_turns": 32, "rag_max_context_tokens": 640, "rag_top_k": 4, "sampling_clamps": {"max_new_tokens_max": 2048, "min_repetition_penalty": 1.04, "temperature_max": 1.3, "top_k_max": 200, "top_p_max": 1.0}}, "vocab_size": 64000}, "modes": [{"description": "Invia la richiesta direttamente nel formato nativo del modello.", "key": "raw", "label": "Fedele"}, {"description": "Ripulisce leggermente la richiesta prima di inviarla al modello.", "key": "assisted", "label": "Assistita"}], "rag": {"adminEnabled": false}, "suggestedPrompts": ["Il nome di un fiume?", "Cos\u2019\u00e8 il DNA?", "Che cos\u0027\u00e8 una favola?", "Che cos\u0027\u00e8 un Database?", "Racconta una storia", "5 canzoni famose?", "Scrivi una parola a caso", "Cos\u2019\u00e8 la fotosintesi?", "Scegli un numero casuale", "Cos\u2019\u00e8 un brevetto?", "Che cos\u0027\u00e8 l\u0027AI?", "Che cos\u2019\u00e8 la RAM?", "Cos\u0027\u00e8 la robotica?", "Scrivi codice HTML", "Cos\u2019\u00e8 il Machine Learning?", "Che cos\u0027\u00e8 un algoritmo?", "Parlami di Roma", "Chi ha scritto l\u2019Odissea?", "Il tuo animale preferito?", "Scrivi un\u0027e-mail al cliente", "Ti va di giocare?", "Parlami del Rinascimento", "Dimmi 3 colori", "Che cos\u0027\u00e8 il Deep Learning?", "Come essere felici?", "Cos\u0027\u00e8 il computer?", "Che cos\u0027\u00e8 un backup?", "Inventa una poesia", "Dimmi una cosa bella", "Che squadra tifi?", "Nomi per un cane?", "Come evitare problemi?", "Che cos\u0027\u00e8 una nana bianca?", "Cos\u0027\u00e8 il futuro?", "Chi ha scritto \"Harry Potter\"?", "Cosa regalo a mamma?", "Qual \u00e8 il fiume di Roma?", "Parlami di Giulio Cesare", "Il tuo supereroe preferito?", "Film fantasy preferiti?", "La capitale della Francia?", "Cos\u2019\u00e8 l\u2019energia cinetica?", "Scrivi una lettera d\u2019amore", "Soffri per le offese?"]};
+</script>
+    <script src="/static/js/feature-flags.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/auth.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/local-login.js?v=selfhosted_v10" defer></script>
+    <script src="/static/vendor/markdown-it.min.js?v=selfhosted_v10" defer></script>
+    <script src="/static/vendor/jsonc-parser.min.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/json_output.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/chat_renderer.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/chat_stream.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/chat_ads.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/chat_ads_view.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/chat_ads_consent.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/chat_ads_provider.js?v=selfhosted_v10" defer></script>
+    
+    <script src="/static/js/chat_ads_runtime.js?v=selfhosted_v10" defer></script>
+    <script src="/static/js/app.js?v=selfhosted_v10" defer></script>
+
+    <!-- toast notifica -->
+    <aside id="storeToast" class="store-toast" role="status" aria-live="polite" hidden>
+        <span class="store-toast__text">Emma arriverà presto su App Store e Google Play. Resta connesso!</span>
+    </aside>
+
+    <!-- toast feedback (pollice su/giù) -->
+    <aside id="feedbackToast" class="feedback-toast" role="status" aria-live="polite" hidden>
+        <span class="feedback-toast__text">Grazie per il feedback</span>
+    </aside>
+
+    <script id="dark-theme-logic">
+    (function() {
+        function applyTheme(theme) {
+            var isDark = theme === 'dark';
+            if (isDark) {
+                document.body.classList.add('dark-theme');
+                document.documentElement.classList.add('dark-theme');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                document.documentElement.classList.remove('dark-theme');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+            var sun = document.getElementById('themeIconSun');
+            var moon = document.getElementById('themeIconMoon');
+            if (sun && moon) {
+                sun.style.display = isDark ? 'inline-block' : 'none';
+                moon.style.display = isDark ? 'none' : 'inline-block';
+            }
+        }
+        function initTheme() {
+            // STRICTLY LIGHT BY DEFAULT: if no saved preference or not 'dark', default to 'light'
+            var saved = localStorage.getItem('emma_theme_v4');
+            if (saved !== 'dark') {
+                saved = 'light';
+                try { localStorage.setItem('emma_theme_v4', 'light'); } catch (e) {}
+            }
+            applyTheme(saved);
+
+            var btn = document.getElementById('themeToggleBtn');
+            if (btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var isCurrentlyDark = document.body.classList.contains('dark-theme');
+                    var next = isCurrentlyDark ? 'light' : 'dark';
+                    applyTheme(next);
+                    try { localStorage.setItem('emma_theme_v4', next); } catch (e) {}
+                });
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTheme);
+        } else {
+            initTheme();
+        }
+
+        // Global Thinking Mode logic
+        window.__isThinking = false;
+        window.setThinkingState = function(active) {
+            window.__isThinking = Boolean(active);
+            try {
+                if (window.state) {
+                    window.state.isThinking = window.__isThinking;
+                }
+            } catch (e) {}
+            var btn = document.getElementById("thinkingFooterToggle");
+            var stateText = document.getElementById("thinkingHwState");
+            if (btn) {
+                if (window.__isThinking) {
+                    btn.classList.add("is-active");
+                    btn.setAttribute("aria-pressed", "true");
+                } else {
+                    btn.classList.remove("is-active");
+                    btn.setAttribute("aria-pressed", "false");
+                }
+            }
+            if (stateText) {
+                stateText.textContent = window.__isThinking ? "ON" : "OFF";
+            }
+        };
+        window.toggleThinkingMode = function(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            if (e && e.stopPropagation) e.stopPropagation();
+            window.setThinkingState(!window.__isThinking);
+            return false;
+        };
+    })();
+    </script>
+</body>
+</html>

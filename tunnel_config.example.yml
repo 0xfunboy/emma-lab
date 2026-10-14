@@ -1,0 +1,13 @@
+# Example Cloudflare Tunnel configuration for Emma-6 Lab
+# Rename to tunnel_config.yml and populate with your credentials
+tunnel: "<YOUR_TUNNEL_UUID>"
+credentials-file: "/path/to/<YOUR_TUNNEL_UUID>.json"
+metrics: "127.0.0.1:20248"
+loglevel: info
+
+ingress:
+  - hostname: "emma.yourdomain.com"
+    service: "http://127.0.0.1:8088"
+    originRequest:
+      connectTimeout: 30s
+  - service: http_status:404

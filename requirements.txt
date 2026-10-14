@@ -1,0 +1,12 @@
+# Core Inference & Server Dependencies for Emma-6 Lab
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+onnxruntime-gpu>=1.19.0; sys_platform == 'linux'
+onnxruntime>=1.19.0; sys_platform != 'linux'
+sentencepiece>=0.2.0
+numpy>=1.26.0,<3.0.0
+pydantic>=2.8.0
+huggingface-hub>=0.24.0
+pyyaml>=6.0
+requests>=2.31.0
+tqdm>=4.66.0

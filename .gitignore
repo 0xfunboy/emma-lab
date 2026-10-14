@@ -1,0 +1,53 @@
+# Python virtual environment
+bin/
+lib/
+lib64
+lib64/
+share/
+include/
+pyvenv.cfg
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Caches & Package locks
+.cache/
+CACHEDIR.TAG
+.lock
+
+# Model weights & binary data (Download separately from HuggingFace)
+models/
+*.onnx
+*.onnx.data
+*.bin
+*.safetensors
+*.pt
+*.pth
+bpe.model
+bpe.vocab
+
+# Credentials, secrets, and private tunnel configs
+tunnel_config.yml
+*.pem
+*.key
+*.token
+*.json
+!config.example.json
+!frontend/**/*.json
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# OS & Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
